@@ -1,0 +1,19 @@
+{
+  "name": "lesbian.quest",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VioletBuse/lesbian.quest.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VioletBuse/lesbian.quest/issues"
+  },
+  "homepage": "https://github.com/VioletBuse/lesbian.quest#readme"
+}
