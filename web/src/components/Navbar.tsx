@@ -23,10 +23,10 @@ export default function Navbar() {
       <Flex h={16} alignItems="center" justifyContent="space-between">
         <Flex gap={8}>
           <Link as={RouterLink} to="/" fontWeight="bold" fontSize="xl">
-            Lesbian.Quest
+            lesbian.quest
           </Link>
           <Link as={RouterLink} to="/adventures">
-            Adventures
+            all adventures
           </Link>
           {isSignedIn && (
             <Link as={RouterLink} to="/create">

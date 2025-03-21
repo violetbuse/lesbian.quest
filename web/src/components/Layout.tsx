@@ -1,4 +1,4 @@
-import { Box, Container, Flex } from '@chakra-ui/react';
+import { Container, Flex } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar.js';
 

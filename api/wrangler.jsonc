@@ -10,11 +10,17 @@
 	"observability": {
 		"enabled": true
 	},
+	"routes": [
+		{
+			"pattern": "lesbian.quest/api/*",
+			"zone_name": "lesbian.quest"
+		}
+	],
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */
-	// "placement": { "mode": "smart" },
+	"placement": { "mode": "smart" },
 
 	/**
 	 * Bindings
@@ -37,9 +43,7 @@
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
-	"vars": {
-		"CLERK_SECRET_KEY": "<your-clerk-secret-key>"
-	},
+	"vars": {},
 	/**
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/

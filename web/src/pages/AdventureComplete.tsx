@@ -1,4 +1,4 @@
-import { Box, Heading, Text, Button, VStack, useToast } from '@chakra-ui/react';
+import { Box, Heading, Text, Button, VStack} from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -15,7 +15,6 @@ interface Adventure {
 export default function AdventureComplete() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const toast = useToast();
 
   const { data: adventure, isLoading } = useQuery<Adventure>({
     queryKey: ['adventure', id],
