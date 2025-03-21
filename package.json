@@ -5,7 +5,14 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev --workspace=web",
+    "dev:api": "npm run dev --workspace=api",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm run build --workspace=web",
+    "build:api": "npm run build --workspace=api",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
   },
   "repository": {
     "type": "git",
@@ -16,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/VioletBuse/lesbian.quest/issues"
   },
-  "homepage": "https://github.com/VioletBuse/lesbian.quest#readme"
+  "homepage": "https://github.com/VioletBuse/lesbian.quest#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
