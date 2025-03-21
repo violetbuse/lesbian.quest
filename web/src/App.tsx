@@ -11,6 +11,7 @@ import AdventurePlay from './pages/AdventurePlay';
 import AdventureComplete from './pages/AdventureComplete';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function App() {
                 />
                 <Route path="sign-in/*" element={<SignIn />} />
                 <Route path="sign-up/*" element={<SignUp />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
           </Router>
