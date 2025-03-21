@@ -12,6 +12,7 @@ import AdventureComplete from './pages/AdventureComplete';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import NotFound from './pages/NotFound';
+import Profile from './pages/Profile';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <AdventureComplete />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="profile"
+                  element={
+                    <RequireAuth>
+                      <Profile />
                     </RequireAuth>
                   }
                 />
