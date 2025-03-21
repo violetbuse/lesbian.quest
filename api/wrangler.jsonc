@@ -26,7 +26,10 @@
 	 "d1_databases": [
 		{
 			"binding": "DB",
-			"database_id" :"00000000-0000-0000-0000-000000000000"
+			"database_name": "lesbian-quest-db",
+			"database_id": "9819e9bd-10ed-4911-8400-4d7cc18cb2e7",
+			"migrations_table": "migrations",
+			"migrations_dir": "migrations"
 		}
 	],
 

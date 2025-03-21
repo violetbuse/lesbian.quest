@@ -7,16 +7,20 @@ import type { Env } from '../types';
 
 export async function getUser(request: Request, env: Env): Promise<string | null> {
     const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
-    const { userId } = await clerk.sessions.getSession(request.headers.get('Authorization')?.replace('Bearer ', '') || '');
+    try {
+        const { userId } = await clerk.sessions.getSession(request.headers.get('Authorization')?.replace('Bearer ', '') || '');
 
-    if (!userId) {
+        if (!userId) {
+            return null;
+        }
+
+        // Get user from database using Drizzle
+        const db = createDb(env.DB);
+        const user = await syncClerkUser(db, clerk, userId);
+        return user?.id || null;
+    } catch (error) {
         return null;
     }
-
-    // Get user from database using Drizzle
-    const db = createDb(env.DB);
-    const user = await syncClerkUser(db, clerk, userId);
-    return user?.id || null;
 }
 
 async function syncClerkUser(db: ReturnType<typeof createDb>, clerk: ReturnType<typeof createClerkClient>, userId: string) {

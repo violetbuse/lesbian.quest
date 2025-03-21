@@ -43,6 +43,12 @@ export default function Adventures() {
 
       {isLoading ? (
         <Text textAlign="center">Loading adventures...</Text>
+      ) : filteredAdventures?.length === 0 ? (
+        <Box textAlign="center" py={8}>
+          <Text fontSize="lg" color="gray.600">
+            {searchQuery ? "No adventures found matching your search" : "No adventures available yet"}
+          </Text>
+        </Box>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
           {filteredAdventures?.map((adventure) => (

@@ -9,7 +9,8 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
 		"db:generate": "drizzle-kit generate:sqlite",
-		"db:push": "wrangler d1 migrations apply lesbian_quest_db",
+		"db:push": "wrangler d1 migrations apply lesbian-quest-db",
+		"db:push:remote": "wrangler d1 migrations apply lesbian-quest-db --remote",
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {

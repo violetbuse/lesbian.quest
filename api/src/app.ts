@@ -10,7 +10,7 @@ import choices from './routes/choices.js';
 import progress from './routes/progress.js';
 
 // Create the app
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
 // Middleware
 app.use('*', logger());

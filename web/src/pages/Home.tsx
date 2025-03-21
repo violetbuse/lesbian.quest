@@ -41,6 +41,12 @@ export default function Home() {
         </Heading>
         {isLoading ? (
           <Text textAlign="center">Loading adventures...</Text>
+        ) : !adventures?.length ? (
+          <Box textAlign="center" py={8}>
+            <Text fontSize="lg" color="gray.600">
+              No adventures available yet. Check back soon!
+            </Text>
+          </Box>
         ) : (
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
             {adventures?.slice(0, 3).map((adventure) => (

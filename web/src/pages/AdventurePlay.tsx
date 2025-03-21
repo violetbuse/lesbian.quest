@@ -94,24 +94,39 @@ export default function AdventurePlay() {
         <Box>
           <Progress value={progressPercentage} colorScheme="purple" mb={4} />
           <Heading mb={4}>{scene.title}</Heading>
-          <Text fontSize="lg" whiteSpace="pre-wrap">
+          <Text fontSize="lg" whiteSpace="pre-wrap" mb={8}>
             {scene.content}
           </Text>
         </Box>
 
-        <VStack spacing={4} align="stretch">
-          {choices?.map((choice) => (
+        {!choices?.length ? (
+          <Box textAlign="center" py={4}>
+            <Text fontSize="lg" color="gray.600">
+              This is the end of this path. You can go back and try different choices.
+            </Text>
             <Button
-              key={choice.id}
-              size="lg"
-              variant="outline"
-              onClick={() => makeChoiceMutation.mutate(choice.id)}
-              isLoading={makeChoiceMutation.isPending}
+              mt={4}
+              colorScheme="purple"
+              onClick={() => navigate(`/adventures/${id}`)}
             >
-              {choice.text}
+              Return to Adventure
             </Button>
-          ))}
-        </VStack>
+          </Box>
+        ) : (
+          <VStack spacing={4} align="stretch">
+            {choices.map((choice) => (
+              <Button
+                key={choice.id}
+                size="lg"
+                variant="outline"
+                onClick={() => makeChoiceMutation.mutate(choice.id)}
+                isLoading={makeChoiceMutation.isPending}
+              >
+                {choice.text}
+              </Button>
+            ))}
+          </VStack>
+        )}
       </VStack>
     </Box>
   );
