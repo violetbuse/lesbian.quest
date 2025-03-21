@@ -23,6 +23,13 @@
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
 
+	 "d1_databases": [
+		{
+			"binding": "DB",
+			"database_id" :"00000000-0000-0000-0000-000000000000"
+		}
+	],
+
 	/**
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables

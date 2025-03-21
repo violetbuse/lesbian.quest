@@ -2,6 +2,22 @@ import { createClerkClient } from '@clerk/backend';
 import { createDb } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import type { Context } from 'hono';
+import type { Env } from '../types';
+
+export async function getUser(request: Request, env: Env): Promise<string | null> {
+    const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
+    const { userId } = await clerk.sessions.getSession(request.headers.get('Authorization')?.replace('Bearer ', '') || '');
+
+    if (!userId) {
+        return null;
+    }
+
+    // Get user from database using Drizzle
+    const db = createDb(env.DB);
+    const user = await syncClerkUser(db, clerk, userId);
+    return user?.id || null;
+}
 
 async function syncClerkUser(db: ReturnType<typeof createDb>, clerk: ReturnType<typeof createClerkClient>, userId: string) {
     const user = await clerk.users.getUser(userId);
@@ -40,16 +56,7 @@ async function syncClerkUser(db: ReturnType<typeof createDb>, clerk: ReturnType<
     return newUser;
 }
 
-export async function getUser(request: Request, env: { CLERK_SECRET_KEY: string; DB: D1Database }): Promise<string | null> {
-    const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
-    const { userId } = await clerk.sessions.getSession(request.headers.get('Authorization')?.replace('Bearer ', '') || '');
-
-    if (!userId) {
-        return null;
-    }
-
-    // Get or create user from database using Drizzle
-    const db = createDb(env.DB);
-    const user = await syncClerkUser(db, clerk, userId);
-    return user?.id || null;
+// Hono middleware helper
+export async function getUserFromContext(c: Context<{ Bindings: Env }>): Promise<string | null> {
+    return getUser(c.req.raw, c.env);
 } 

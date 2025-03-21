@@ -1,6 +1,9 @@
 {
   "name": "lesbian.quest",
-  "workspaces": ["api", "web"],
+  "workspaces": [
+    "api",
+    "web"
+  ],
   "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
@@ -25,6 +28,7 @@
   },
   "homepage": "https://github.com/VioletBuse/lesbian.quest#readme",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "wrangler": "^4.3.0"
   }
 }
