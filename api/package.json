@@ -17,6 +17,7 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
 		"@cloudflare/workers-types": "^4.20250311.0",
+		"@types/node": "^22.13.11",
 		"drizzle-kit": "^0.20.14",
 		"drizzle-orm": "^0.29.3",
 		"typescript": "^5.5.2",

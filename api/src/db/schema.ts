@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
+import { InferModel, relations } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
     id: text('id').primaryKey(),
@@ -84,4 +85,57 @@ export const playerProgress = sqliteTable('player_progress', {
     updatedAt: integer('updated_at', { mode: 'timestamp' })
         .default(sql`CURRENT_TIMESTAMP`)
         .notNull(),
-}); 
+});
+
+// Types
+export type User = InferModel<typeof users>;
+export type Adventure = InferModel<typeof adventures>;
+export type Scene = InferModel<typeof scenes>;
+export type Choice = InferModel<typeof choices>;
+export type PlayerProgress = InferModel<typeof playerProgress>;
+
+// Relations
+export const adventuresRelations = relations(adventures, ({ one, many }: { one: any; many: any }) => ({
+    author: one(users, {
+        fields: [adventures.authorId],
+        references: [users.id],
+    }),
+    scenes: many(scenes),
+}));
+
+export const scenesRelations = relations(scenes, ({ one, many }: { one: any; many: any }) => ({
+    adventure: one(adventures, {
+        fields: [scenes.adventureId],
+        references: [adventures.id],
+    }),
+    fromChoices: many(choices, { relationName: 'fromScene' }),
+    toChoices: many(choices, { relationName: 'toScene' }),
+}));
+
+export const choicesRelations = relations(choices, ({ one }: { one: any }) => ({
+    fromScene: one(scenes, {
+        fields: [choices.fromSceneId],
+        references: [scenes.id],
+        relationName: 'fromScene',
+    }),
+    toScene: one(scenes, {
+        fields: [choices.toSceneId],
+        references: [scenes.id],
+        relationName: 'toScene',
+    }),
+}));
+
+export const playerProgressRelations = relations(playerProgress, ({ one }: { one: any }) => ({
+    user: one(users, {
+        fields: [playerProgress.userId],
+        references: [users.id],
+    }),
+    adventure: one(adventures, {
+        fields: [playerProgress.adventureId],
+        references: [adventures.id],
+    }),
+    currentScene: one(scenes, {
+        fields: [playerProgress.currentSceneId],
+        references: [scenes.id],
+    }),
+})); 

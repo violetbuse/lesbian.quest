@@ -2,9 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
-import adventuresRouter from './routes/creators/adventures';
-import scenesRouter from './routes/creators/scenes';
-import choicesRouter from './routes/creators/choices';
+import creatorsRouter from './routes/creators/index';
 import type { Env } from './types';
 
 // Create the app
@@ -19,9 +17,7 @@ app.use('*', prettyJSON());
 app.get('/', (c) => c.json({ status: 'ok' }));
 
 // Routes
-app.route('/api/creators/adventures', adventuresRouter);
-app.route('/api/creators/scenes', scenesRouter);
-app.route('/api/creators/choices', choicesRouter);
+app.route('/api/creators', creatorsRouter);
 
 // Error handling
 app.onError((err, c) => {
