@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+All server code lives in the /api directory, it is a cloudflare workers project with drizzle-orm and hono.
+The web app lives in the /web directory. it is a react + typescript vite project using tailwindcss, radix-ui, and swr

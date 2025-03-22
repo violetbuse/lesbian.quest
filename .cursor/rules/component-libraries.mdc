@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Try to use radix-ui components/primitives when possible, exceptions are when using very specialized components like clerk's sign in/profile components, but generally try not to download/install new component libraries like chakra

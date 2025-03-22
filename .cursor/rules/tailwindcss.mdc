@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Styling should be done using tailwindcss when possible, use the radix-tailwindcss library, and for animations use framer-motion

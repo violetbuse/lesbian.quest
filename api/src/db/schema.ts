@@ -35,6 +35,7 @@ export const scenes = sqliteTable('scenes', {
         .references(() => adventures.id),
     title: text('title').notNull(),
     content: text('content').notNull(),
+    imageUrl: text('image_url'), // Optional image URL for the scene
     isStartScene: integer('is_start_scene', { mode: 'boolean' }).notNull().default(false),
     order: integer('order').notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })
@@ -54,6 +55,7 @@ export const choices = sqliteTable('choices', {
         .notNull()
         .references(() => scenes.id),
     text: text('text').notNull(),
+    imageUrl: text('image_url'), // Optional image URL for the choice
     condition: text('condition'), // Optional JavaScript condition to evaluate
     order: integer('order').notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })

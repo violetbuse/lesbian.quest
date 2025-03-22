@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Prefer to operate on the server, the client's job is to as much as possible operate as a pure function of server state
