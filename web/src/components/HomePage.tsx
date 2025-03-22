@@ -3,7 +3,7 @@ import * as Separator from '@radix-ui/react-separator';
 import { motion } from 'framer-motion';
 
 export function HomePage() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn} = useUser();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
