@@ -29,6 +29,9 @@ export default defineWorkersConfig(async () => {
 					},
 				},
 			},
+			alias: {
+				'@': path.resolve(__dirname, './src'),
+			}
 		}
 	}
 });

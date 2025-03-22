@@ -2,6 +2,7 @@ import { eq, and, or } from 'drizzle-orm';
 import { createDb } from '../db';
 import { scenes, playerProgress, choices } from '../db/schema';
 import type { D1Database } from '@cloudflare/workers-types';
+import { nanoid } from 'nanoid';
 
 export interface CreateSceneData {
     title: string;
@@ -44,7 +45,7 @@ export class SceneService {
         const scene = await this.db
             .insert(scenes)
             .values({
-                id: crypto.randomUUID(),
+                id: nanoid(),
                 adventureId,
                 title: data.title,
                 content: data.content,

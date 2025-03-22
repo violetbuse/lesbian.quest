@@ -4,6 +4,7 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 import type { Env } from '../types';
+import { nanoid } from 'nanoid';
 
 type TestUser = {
     userId: string;
@@ -83,7 +84,7 @@ async function syncClerkUser(db: ReturnType<typeof createDb>, env: Env, userId: 
     const newUser = await db
         .insert(users)
         .values({
-            id: crypto.randomUUID(),
+            id: nanoid(),
             clerkId: userId,
             email: user.emailAddresses[0]?.emailAddress || '',
             username: user.username || user.firstName || 'user',

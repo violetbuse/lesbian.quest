@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import creatorsRouter from './routes/creators/index';
+import playersRouter from './routes/players/index';
 import type { Env } from './types';
 
 // Create the app
@@ -18,6 +19,7 @@ app.get('/', (c) => c.json({ status: 'ok' }));
 
 // Routes
 app.route('/api/creators', creatorsRouter);
+app.route('/api/players', playersRouter);
 
 // Error handling
 app.onError((err, c) => {

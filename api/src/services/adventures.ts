@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { createDb } from '../db';
 import { adventures } from '../db/schema';
 import type { D1Database } from '@cloudflare/workers-types';
+import { nanoid } from 'nanoid';
 
 export interface CreateAdventureData {
     title: string;
@@ -22,7 +23,7 @@ export class AdventureService {
         const adventure = await this.db
             .insert(adventures)
             .values({
-                id: crypto.randomUUID(),
+                id: nanoid(),
                 authorId: userId,
                 title: data.title,
                 description: data.description,

@@ -2,6 +2,7 @@ import { eq, and } from 'drizzle-orm';
 import { createDb } from '../db';
 import { choices } from '../db/schema';
 import type { D1Database } from '@cloudflare/workers-types';
+import { nanoid } from 'nanoid';
 
 export interface CreateChoiceData {
     text: string;
@@ -24,7 +25,7 @@ export class ChoiceService {
         const choice = await this.db
             .insert(choices)
             .values({
-                id: crypto.randomUUID(),
+                id: nanoid(),
                 fromSceneId,
                 toSceneId: data.toSceneId,
                 text: data.text,
