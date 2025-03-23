@@ -1,10 +1,11 @@
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import { createDb } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
 import type { Env } from '../types';
 import { nanoid } from 'nanoid';
+import { getAuth } from '@hono/clerk-auth';
 
 type TestUser = {
     userId: string;
@@ -14,9 +15,10 @@ type TestUser = {
     clerkId: string;
 };
 
-async function getClerkUserDetails(env: Env, authHeader: string | null) {
+async function getClerkUserDetails(c: Context<{ Bindings: Env }>) {
     // In test environment, parse the auth header directly
-    if (env.ENVIRONMENT === 'test' || env.ENVIRONMENT === 'testing') {
+    if (c.env.ENVIRONMENT === 'test' || c.env.ENVIRONMENT === 'testing') {
+        const authHeader = c.req.raw.headers.get('Authorization');
         if (!authHeader) return null;
         try {
             const testUser = JSON.parse(authHeader) as TestUser;
@@ -32,36 +34,40 @@ async function getClerkUserDetails(env: Env, authHeader: string | null) {
     }
 
     // Production environment uses Clerk
-    const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
+    const clerk = createClerkClient({
+        secretKey: c.env.CLERK_SECRET_KEY,
+        publishableKey: c.env.CLERK_PUBLISHABLE_KEY
+    })
     try {
-        // Get session
-        const sessionToken = authHeader?.replace('Bearer ', '') || '';
-        const session = await clerk.sessions.getSession(sessionToken);
-        if (!session?.userId) return null;
+        const auth = getAuth(c)
+        if (!auth?.userId) {
+            return null
+        }
 
-        // Get user details
-        const user = await clerk.users.getUser(session.userId);
-        return user;
+        const user = await clerk.users.getUser(auth.userId)
+
+        return user
+
     } catch (error) {
+        console.error(error)
         return null;
     }
 }
 
-export async function getUser(request: Request, env: Env): Promise<string | null> {
-    const authHeader = request.headers.get('Authorization');
-    const user = await getClerkUserDetails(env, authHeader);
+export async function getUser(c: Context<{ Bindings: Env }>): Promise<string | null> {
+    const user = await getClerkUserDetails(c);
     if (!user) {
         return null;
     }
 
     // Get user from database using Drizzle
-    const db = createDb(env.DB);
-    const dbUser = await syncClerkUser(db, env, user.id, authHeader);
+    const db = createDb(c.env.DB);
+    const dbUser = await syncClerkUser(db, c.env, user.id, c);
     return dbUser?.id || null;
 }
 
-async function syncClerkUser(db: ReturnType<typeof createDb>, env: Env, userId: string, authHeader: string | null) {
-    const user = await getClerkUserDetails(env, authHeader);
+async function syncClerkUser(db: ReturnType<typeof createDb>, env: Env, userId: string, c: Context<{ Bindings: Env }>) {
+    const user = await getClerkUserDetails(c);
     if (!user) return null;
 
     // Check if user exists
@@ -99,5 +105,5 @@ async function syncClerkUser(db: ReturnType<typeof createDb>, env: Env, userId: 
 
 // Hono middleware helper
 export async function getUserFromContext(c: Context<{ Bindings: Env }>): Promise<string | null> {
-    return getUser(c.req.raw, c.env);
+    return getUser(c);
 } 

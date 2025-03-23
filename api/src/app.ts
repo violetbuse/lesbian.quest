@@ -5,6 +5,7 @@ import { prettyJSON } from 'hono/pretty-json';
 import creatorsRouter from './routes/creators/index';
 import playersRouter from './routes/players/index';
 import type { Env } from './types';
+import { clerkMiddleware } from '@hono/clerk-auth';
 
 // Create the app
 const app = new Hono<{ Bindings: Env }>();
@@ -13,6 +14,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', logger());
 app.use('*', cors());
 app.use('*', prettyJSON());
+app.use('*', clerkMiddleware())
 
 // Health check
 app.get('/', (c) => c.json({ status: 'ok' }));

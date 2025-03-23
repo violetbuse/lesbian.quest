@@ -26,6 +26,7 @@
 	},
 	"dependencies": {
 		"@clerk/backend": "^1.25.4",
+		"@hono/clerk-auth": "^2.0.0",
 		"@hono/node-server": "^1.13.8",
 		"hono": "^4.7.5",
 		"nanoid": "^5.1.5"

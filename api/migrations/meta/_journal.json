@@ -15,6 +15,13 @@
       "when": 1742656719117,
       "tag": "0001_little_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1742744852053,
+      "tag": "0002_neat_garia",
+      "breakpoints": true
     }
   ]
 }
