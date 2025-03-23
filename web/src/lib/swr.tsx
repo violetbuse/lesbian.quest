@@ -9,7 +9,7 @@ function useAuthenticatedFetcher() {
 
   return async (url: string) => {
     const token = await getToken();
-    console.log({token})
+    // console.log({token})
     
     const response = await fetch(url, {
       headers: {

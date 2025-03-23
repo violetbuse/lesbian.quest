@@ -18,12 +18,10 @@ export function MyAdventuresPage() {
 
   const handleCreateAdventure = async (data: { title: string; description: string }) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch('/api/creators/adventures', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
@@ -39,12 +37,8 @@ export function MyAdventuresPage() {
 
   const handleFavorite = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/favorite`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to favorite adventure');
@@ -57,12 +51,8 @@ export function MyAdventuresPage() {
 
   const handleUnfavorite = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/favorite`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to unfavorite adventure');
@@ -75,12 +65,8 @@ export function MyAdventuresPage() {
 
   const handleLike = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/like`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to like adventure');
@@ -93,12 +79,8 @@ export function MyAdventuresPage() {
 
   const handleUnlike = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/like`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to unlike adventure');
@@ -111,12 +93,8 @@ export function MyAdventuresPage() {
 
   const handleSave = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/save`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to save adventure');
@@ -129,12 +107,8 @@ export function MyAdventuresPage() {
 
   const handleUnsave = async (adventureId: string) => {
     try {
-      const token = await getToken({ template: 'default' });
       const response = await fetch(`/api/players/adventures/${adventureId}/save`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       if (!response.ok) {
         throw new Error('Failed to unsave adventure');
@@ -218,7 +192,7 @@ export function MyAdventuresPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <Navbar />
-      
+
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
