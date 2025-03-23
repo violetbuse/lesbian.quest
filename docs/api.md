@@ -27,6 +27,14 @@ This document provides comprehensive documentation for all API routes in the Les
     - [GET /api/players/progress/:adventureId](#get-apiplayersprogressadventureid)
     - [POST /api/players/progress/:adventureId](#post-apiplayersprogressadventureid)
     - [DELETE /api/players/progress/:adventureId](#delete-apiplayersprogressadventureid)
+  - [Interactions](#interactions)
+    - [Favorite an Adventure](#favorite-an-adventure)
+    - [Remove Favorite](#remove-favorite)
+    - [Like an Adventure](#like-an-adventure)
+    - [Unlike an Adventure](#unlike-an-adventure)
+    - [Save an Adventure](#save-an-adventure)
+    - [Remove Save](#remove-save)
+    - [Get User Interactions](#get-user-interactions)
 - [Error Responses](#error-responses)
 - [Data Validation](#data-validation)
 
@@ -656,6 +664,180 @@ Deletes the player's progress for a specific adventure.
     "error": "Progress not found"
 }
 ```
+
+### Interactions
+
+#### Favorite an Adventure
+```http
+POST /api/players/adventures/:adventureId/favorite
+```
+
+Adds an adventure to the user's favorites.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to favorite
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: When the adventure is already favorited
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Remove Favorite
+```http
+DELETE /api/players/adventures/:adventureId/favorite
+```
+
+Removes an adventure from the user's favorites.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to remove from favorites
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Like an Adventure
+```http
+POST /api/players/adventures/:adventureId/like
+```
+
+Likes an adventure.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to like
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: When the adventure is already liked
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Unlike an Adventure
+```http
+DELETE /api/players/adventures/:adventureId/like
+```
+
+Removes a like from an adventure.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to unlike
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Save an Adventure
+```http
+POST /api/players/adventures/:adventureId/save
+```
+
+Saves an adventure for later.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to save
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: When the adventure is already saved
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Remove Save
+```http
+DELETE /api/players/adventures/:adventureId/save
+```
+
+Removes an adventure from the user's saves.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to remove from saves
+
+**Response:**
+```json
+{
+    "success": true
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: When the user is not authenticated
+
+#### Get User Interactions
+```http
+GET /api/players/adventures/interactions
+```
+
+Retrieves all user interactions (favorites, likes, and saves).
+
+**Response:**
+```json
+{
+    "favorites": [
+        {
+            "id": "adventure-id",
+            "title": "Adventure Title",
+            "description": "Adventure Description",
+            "isPublished": true,
+            "authorId": "author-id",
+            "createdAt": "2024-03-21T12:00:00Z",
+            "updatedAt": "2024-03-21T12:00:00Z"
+        }
+    ],
+    "likes": [
+        {
+            "id": "adventure-id",
+            "title": "Adventure Title",
+            "description": "Adventure Description",
+            "isPublished": true,
+            "authorId": "author-id",
+            "createdAt": "2024-03-21T12:00:00Z",
+            "updatedAt": "2024-03-21T12:00:00Z"
+        }
+    ],
+    "saves": [
+        {
+            "id": "adventure-id",
+            "title": "Adventure Title",
+            "description": "Adventure Description",
+            "isPublished": true,
+            "authorId": "author-id",
+            "createdAt": "2024-03-21T12:00:00Z",
+            "updatedAt": "2024-03-21T12:00:00Z"
+        }
+    ]
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: When the user is not authenticated
 
 ## Error Responses
 

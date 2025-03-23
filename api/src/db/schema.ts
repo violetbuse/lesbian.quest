@@ -87,12 +87,54 @@ export const playerProgress = sqliteTable('player_progress', {
         .notNull(),
 });
 
+export const favorites = sqliteTable('favorites', {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id),
+    adventureId: text('adventure_id')
+        .notNull()
+        .references(() => adventures.id),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull(),
+});
+
+export const likes = sqliteTable('likes', {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id),
+    adventureId: text('adventure_id')
+        .notNull()
+        .references(() => adventures.id),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull(),
+});
+
+export const saves = sqliteTable('saves', {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id),
+    adventureId: text('adventure_id')
+        .notNull()
+        .references(() => adventures.id),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull(),
+});
+
 // Types
 export type User = InferModel<typeof users>;
 export type Adventure = InferModel<typeof adventures>;
 export type Scene = InferModel<typeof scenes>;
 export type Choice = InferModel<typeof choices>;
 export type PlayerProgress = InferModel<typeof playerProgress>;
+export type Favorite = InferModel<typeof favorites>;
+export type Like = InferModel<typeof likes>;
+export type Save = InferModel<typeof saves>;
 
 // Relations
 export const adventuresRelations = relations(adventures, ({ one, many }: { one: any; many: any }) => ({
@@ -101,6 +143,9 @@ export const adventuresRelations = relations(adventures, ({ one, many }: { one: 
         references: [users.id],
     }),
     scenes: many(scenes),
+    favorites: many(favorites),
+    likes: many(likes),
+    saves: many(saves),
 }));
 
 export const scenesRelations = relations(scenes, ({ one, many }: { one: any; many: any }) => ({
@@ -137,5 +182,38 @@ export const playerProgressRelations = relations(playerProgress, ({ one }: { one
     currentScene: one(scenes, {
         fields: [playerProgress.currentSceneId],
         references: [scenes.id],
+    }),
+}));
+
+export const favoritesRelations = relations(favorites, ({ one }: { one: any }) => ({
+    user: one(users, {
+        fields: [favorites.userId],
+        references: [users.id],
+    }),
+    adventure: one(adventures, {
+        fields: [favorites.adventureId],
+        references: [adventures.id],
+    }),
+}));
+
+export const likesRelations = relations(likes, ({ one }: { one: any }) => ({
+    user: one(users, {
+        fields: [likes.userId],
+        references: [users.id],
+    }),
+    adventure: one(adventures, {
+        fields: [likes.adventureId],
+        references: [adventures.id],
+    }),
+}));
+
+export const savesRelations = relations(saves, ({ one }: { one: any }) => ({
+    user: one(users, {
+        fields: [saves.userId],
+        references: [users.id],
+    }),
+    adventure: one(adventures, {
+        fields: [saves.adventureId],
+        references: [adventures.id],
     }),
 })); 

@@ -1,5 +1,6 @@
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export function Navbar() {
   const { isSignedIn } = useUser();
@@ -11,9 +12,19 @@ export function Navbar() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center"
+            className="flex items-center gap-8"
           >
-            <h1 className="text-2xl font-bold text-purple-600">lesbian.quest</h1>
+            <Link to="/" className="text-2xl font-bold text-purple-600">
+              lesbian.quest
+            </Link>
+            {isSignedIn && (
+              <Link
+                to="/my-adventures"
+                className="text-sm font-medium text-gray-700 hover:text-purple-600"
+              >
+                My Adventures
+              </Link>
+            )}
           </motion.div>
           <div className="flex items-center gap-4">
             {!isSignedIn ? (

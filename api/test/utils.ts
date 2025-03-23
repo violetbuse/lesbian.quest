@@ -188,3 +188,39 @@ export const make_progress_request = async (
         body: body ? JSON.stringify(body) : undefined
     });
 };
+
+export const make_interactions_request = async (
+    path: string = '',
+    options: {
+        method?: string;
+        userId?: string;
+        username?: string;
+        email?: string;
+        body?: any;
+        authenticated?: boolean;
+    } = {}
+) => {
+    const {
+        method = 'GET',
+        userId = 'test-user',
+        username = 'test',
+        email = 'test@test.com',
+        body,
+        authenticated = true
+    } = options;
+
+    const headers: Record<string, string> = {};
+    if (authenticated) {
+        headers['Authorization'] = create_authorization_header(userId, username, email);
+    }
+
+    if (body) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    return await SELF.fetch(`https://lesbian.quest/api/players/adventures${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined
+    });
+};
