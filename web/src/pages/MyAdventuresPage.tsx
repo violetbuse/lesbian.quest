@@ -124,31 +124,31 @@ export function MyAdventuresPage() {
       key={adventure.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
     >
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">{adventure.title}</h2>
-      <p className="text-gray-500 mb-4">{adventure.description}</p>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{adventure.title}</h2>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">{adventure.description}</p>
       <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 dark:text-gray-500">
           Created {new Date(adventure.createdAt).toLocaleDateString()}
         </p>
         {type === 'created' && (
           <div className="flex gap-2">
             <button
               onClick={() => handleFavorite(adventure.id)}
-              className="text-sm text-purple-600 hover:text-purple-500"
+              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
             >
               Favorite
             </button>
             <button
               onClick={() => handleLike(adventure.id)}
-              className="text-sm text-purple-600 hover:text-purple-500"
+              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
             >
               Like
             </button>
             <button
               onClick={() => handleSave(adventure.id)}
-              className="text-sm text-purple-600 hover:text-purple-500"
+              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
             >
               Save
             </button>
@@ -190,16 +190,16 @@ export function MyAdventuresPage() {
   const saves = interactions?.saves || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
 
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My Adventures</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Adventures</h1>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:focus:ring-offset-gray-900"
             >
               Create New Adventure
             </button>
@@ -209,12 +209,12 @@ export function MyAdventuresPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12 bg-white rounded-lg shadow-sm"
+              className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
             >
-              <p className="text-gray-500 text-lg">You haven't created or interacted with any adventures yet.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">You haven't created or interacted with any adventures yet.</p>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="mt-4 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-500"
+                className="mt-4 px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
               >
                 Create your first adventure
               </button>
@@ -223,7 +223,7 @@ export function MyAdventuresPage() {
             <div className="space-y-8">
               {adventures.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Created Adventures</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Created Adventures</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {adventures.map((adventure) => (
                       <AdventureCard key={adventure.id} adventure={adventure} type="created" />
@@ -234,7 +234,7 @@ export function MyAdventuresPage() {
 
               {favorites.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Favorites</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Favorites</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {favorites.map((adventure) => (
                       <AdventureCard key={adventure.id} adventure={adventure} type="favorite" />
@@ -245,7 +245,7 @@ export function MyAdventuresPage() {
 
               {likes.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Liked Adventures</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Liked Adventures</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {likes.map((adventure) => (
                       <AdventureCard key={adventure.id} adventure={adventure} type="like" />
@@ -256,7 +256,7 @@ export function MyAdventuresPage() {
 
               {saves.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Saved Adventures</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Saved Adventures</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {saves.map((adventure) => (
                       <AdventureCard key={adventure.id} adventure={adventure} type="save" />
