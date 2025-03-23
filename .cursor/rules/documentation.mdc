@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Always document new api routes and services, including any side effects, the shape of the data they return/require, and anything that might possibly be useful.
