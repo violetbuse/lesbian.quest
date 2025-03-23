@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "wrangler pages deploy dist --project-name lesbian-quest-site"
+    "deploy": "wrangler pages deploy dist --project-name lesbian-quest-site",
+    "test": "echo \"website doesn't have tests yet\""
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.25.1",

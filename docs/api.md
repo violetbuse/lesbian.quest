@@ -795,7 +795,7 @@ Removes an adventure from the user's saves.
 GET /api/players/adventures/interactions
 ```
 
-Retrieves all user interactions (favorites, likes, and saves).
+Retrieves all user interactions (favorites, likes, saves, and played adventures).
 
 **Response:**
 ```json
@@ -823,6 +823,17 @@ Retrieves all user interactions (favorites, likes, and saves).
         }
     ],
     "saves": [
+        {
+            "id": "adventure-id",
+            "title": "Adventure Title",
+            "description": "Adventure Description",
+            "isPublished": true,
+            "authorId": "author-id",
+            "createdAt": "2024-03-21T12:00:00Z",
+            "updatedAt": "2024-03-21T12:00:00Z"
+        }
+    ],
+    "played": [
         {
             "id": "adventure-id",
             "title": "Adventure Title",

@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
     create_test_user,
     create_test_adventure,
+    create_test_scene,
+    create_test_choice,
+    create_test_progress,
     make_interactions_request,
 } from '../utils';
 
@@ -243,7 +246,7 @@ describe('Interactions API', () => {
 
             const response = await make_interactions_request('/interactions');
             expect(response.status).toBe(200);
-            const data = await response.json();
+            const data = await response.json() as { favorites: any[], likes: any[], saves: any[], played: any[] };
 
             expect(data).toEqual({
                 favorites: [{
@@ -252,8 +255,8 @@ describe('Interactions API', () => {
                     description: adventure.description,
                     isPublished: adventure.isPublished,
                     authorId: adventure.authorId,
-                    createdAt: null,
-                    updatedAt: null,
+                    createdAt: expect.any(String),
+                    updatedAt: expect.any(String),
                 }],
                 likes: [{
                     id: adventure.id,
@@ -261,8 +264,8 @@ describe('Interactions API', () => {
                     description: adventure.description,
                     isPublished: adventure.isPublished,
                     authorId: adventure.authorId,
-                    createdAt: null,
-                    updatedAt: null,
+                    createdAt: expect.any(String),
+                    updatedAt: expect.any(String),
                 }],
                 saves: [{
                     id: adventure.id,
@@ -270,19 +273,55 @@ describe('Interactions API', () => {
                     description: adventure.description,
                     isPublished: adventure.isPublished,
                     authorId: adventure.authorId,
-                    createdAt: null,
-                    updatedAt: null,
+                    createdAt: expect.any(String),
+                    updatedAt: expect.any(String),
                 }],
+                played: [],
             });
         });
 
-        it('should return empty arrays when no interactions exist', async () => {
+        it('should include played adventures in the response', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+
+            // Create scenes
+            const startScene = await create_test_scene(adventure.id, {
+                title: 'Start Scene',
+                content: 'Welcome to the adventure!',
+                isStartScene: true,
+                order: 1,
+            });
+            const nextScene = await create_test_scene(adventure.id, {
+                title: 'Next Scene',
+                content: 'You move forward...',
+                order: 2,
+            });
+
+            // Create a choice between scenes
+            await create_test_choice(startScene.id, nextScene.id, {
+                text: 'Move forward',
+                order: 0,
+            });
+
+            // Create progress for the adventure
+            await create_test_progress(TEST_USER.id, {
+                adventureId: adventure.id,
+                currentSceneId: nextScene.id,
+                variables: { health: 100 },
+            });
+
             const response = await make_interactions_request('/interactions');
             expect(response.status).toBe(200);
-            expect(await response.json()).toEqual({
-                favorites: [],
-                likes: [],
-                saves: [],
+            const data = await response.json() as { favorites: any[], likes: any[], saves: any[], played: any[] };
+
+            expect(data.played).toHaveLength(1);
+            expect(data.played[0]).toEqual({
+                id: adventure.id,
+                title: adventure.title,
+                description: adventure.description,
+                isPublished: adventure.isPublished,
+                authorId: adventure.authorId,
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
             });
         });
 

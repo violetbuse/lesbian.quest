@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm';
 import { createDb } from '../db';
-import { favorites, likes, saves } from '../db/schema';
+import { favorites, likes, saves, playerProgress } from '../db/schema';
 import type { D1Database } from '@cloudflare/workers-types';
 import { nanoid } from 'nanoid';
 
@@ -8,6 +8,7 @@ export interface UserInteractions {
     favorites: any[];
     likes: any[];
     saves: any[];
+    played: any[];
 }
 
 export class InteractionsService {
@@ -115,7 +116,7 @@ export class InteractionsService {
 
     // Get all interactions
     async getUserInteractions(userId: string): Promise<UserInteractions> {
-        const [favoritesList, likesList, savesList] = await Promise.all([
+        const [favoritesList, likesList, savesList, playedList] = await Promise.all([
             this.db.query.favorites.findMany({
                 where: eq(favorites.userId, userId),
                 with: {
@@ -134,12 +135,19 @@ export class InteractionsService {
                     adventure: true,
                 },
             }),
+            this.db.query.playerProgress.findMany({
+                where: eq(playerProgress.userId, userId),
+                with: {
+                    adventure: true,
+                },
+            }),
         ]);
 
         return {
             favorites: favoritesList.map(f => f.adventure),
             likes: likesList.map(l => l.adventure),
             saves: savesList.map(s => s.adventure),
+            played: playedList.map(p => p.adventure),
         };
     }
 } 
