@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import useSWR from 'swr';
 import { useAuth } from '@clerk/clerk-react';
@@ -30,18 +30,74 @@ export function MyAdventuresPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { getToken } = useAuth();
   const { showToast } = useToast();
-  const { data: createdAdventures, error: createdError, isLoading: isLoadingCreated, mutate: mutateCreated } = useSWR<Adventure[]>('/api/creators/adventures');
+  const { data: createdAdventures, error: createdError, isLoading: isLoadingCreated, mutate: mutateCreated } = useSWR<Adventure[]>(
+    '/api/creators/adventures',
+    async (url) => {
+      console.log("fetching adventures")
+      const token = await getToken();
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('An error occurred while fetching the data.');
+      }
+      return response.json();
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0
+    }
+  );
+
   const { data: interactions, error: interactionsError, isLoading: isLoadingInteractions, mutate: mutateInteractions } = useSWR<{
     favorites: Adventure[];
     likes: Adventure[];
     saves: Adventure[];
-  }>('/api/players/adventures/interactions');
+  }>(
+    '/api/players/adventures/interactions',
+    async (url) => {
+      const token = await getToken();
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('An error occurred while fetching the data.');
+      }
+      return response.json();
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0
+    }
+  );
+
+  useEffect(() => {
+    if (createdError) {
+      showToast('Failed to load created adventures');
+    }
+  }, [createdError]);
+
+  useEffect(() => {
+    if (interactionsError) {
+      showToast('Failed to load interactions');
+    }
+  }, [interactionsError]);
 
   const handleCreateAdventure = async (data: { title: string; description: string }) => {
     try {
+      const token = await getToken();
       const response = await fetch('/api/creators/adventures', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
@@ -58,10 +114,52 @@ export function MyAdventuresPage() {
     }
   };
 
+  const uniqueAdventures = useMemo(() => {
+    if (!createdAdventures && !interactions) return [];
+
+    const allAdventures = new Map<string, { adventure: Adventure; types: Set<string> }>();
+
+    // Add created adventures
+    createdAdventures?.forEach(adventure => {
+      allAdventures.set(adventure.id, { adventure, types: new Set(['created']) });
+    });
+
+    // Add favorites
+    interactions?.favorites.forEach(adventure => {
+      const existing = allAdventures.get(adventure.id);
+      if (existing) {
+        existing.types.add('favorite');
+      } else {
+        allAdventures.set(adventure.id, { adventure, types: new Set(['favorite']) });
+      }
+    });
+
+    // Add likes
+    interactions?.likes.forEach(adventure => {
+      const existing = allAdventures.get(adventure.id);
+      if (existing) {
+        existing.types.add('like');
+      } else {
+        allAdventures.set(adventure.id, { adventure, types: new Set(['like']) });
+      }
+    });
+
+    // Add saves
+    interactions?.saves.forEach(adventure => {
+      const existing = allAdventures.get(adventure.id);
+      if (existing) {
+        existing.types.add('save');
+      } else {
+        allAdventures.set(adventure.id, { adventure, types: new Set(['save']) });
+      }
+    });
+
+    return Array.from(allAdventures.values());
+  }, [createdAdventures, interactions]);
+
   if (createdError) {
-    showToast('Failed to load created adventures');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
         <Navbar />
         <main className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,9 +171,8 @@ export function MyAdventuresPage() {
   }
 
   if (interactionsError) {
-    showToast('Failed to load interactions');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
         <Navbar />
         <main className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,46 +182,6 @@ export function MyAdventuresPage() {
       </div>
     );
   }
-
-  // Combine and deduplicate adventures
-  const allAdventures = new Map<string, { adventure: Adventure; types: Set<string> }>();
-
-  // Add created adventures
-  createdAdventures?.forEach(adventure => {
-    allAdventures.set(adventure.id, { adventure, types: new Set(['created']) });
-  });
-
-  // Add favorites
-  interactions?.favorites.forEach(adventure => {
-    const existing = allAdventures.get(adventure.id);
-    if (existing) {
-      existing.types.add('favorite');
-    } else {
-      allAdventures.set(adventure.id, { adventure, types: new Set(['favorite']) });
-    }
-  });
-
-  // Add likes
-  interactions?.likes.forEach(adventure => {
-    const existing = allAdventures.get(adventure.id);
-    if (existing) {
-      existing.types.add('like');
-    } else {
-      allAdventures.set(adventure.id, { adventure, types: new Set(['like']) });
-    }
-  });
-
-  // Add saves
-  interactions?.saves.forEach(adventure => {
-    const existing = allAdventures.get(adventure.id);
-    if (existing) {
-      existing.types.add('save');
-    } else {
-      allAdventures.set(adventure.id, { adventure, types: new Set(['save']) });
-    }
-  });
-
-  const uniqueAdventures = Array.from(allAdventures.values());
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">

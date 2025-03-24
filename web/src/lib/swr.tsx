@@ -34,7 +34,9 @@ function AuthenticatedSWRConfig({ children }: { children: ReactNode }) {
     fetcher,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
-    refreshInterval: 5000
+    refreshInterval: 5000,
+    errorRetryCount: 5,
+    errorRetryInterval: 10_000
   };
 
   return (

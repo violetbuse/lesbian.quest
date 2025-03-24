@@ -3,6 +3,8 @@ import useSWR from 'swr';
 import { Adventure } from '../types';
 import { Heart, Star, Bookmark, Flag, PenSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
+import { useCallback } from 'react';
 
 interface AdventureCardProps {
     adventureId: string;
@@ -16,15 +18,43 @@ interface AdventureState {
     isPlayed: boolean;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
 export function AdventureCard({
     adventureId,
     type,
 }: AdventureCardProps) {
-    const { data: adventure, error: adventureError } = useSWR<Adventure>(`/api/creators/adventures/${adventureId}`, fetcher);
-    const { data: state, error: stateError, mutate: mutateState } = useSWR<AdventureState>(`/api/players/adventures/${adventureId}/state`, fetcher);
-    const { mutate: mutateInteractions } = useSWR('/api/players/adventures/interactions');
+    const { getToken } = useAuth();
+
+    const fetcher = useCallback(async (url: string) => {
+        const token = await getToken();
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            throw new Error('An error occurred while fetching the data.');
+        }
+        return response.json();
+    }, [getToken]);
+
+    const { data: adventure, error: adventureError } = useSWR<Adventure>(
+        `/api/creators/adventures/${adventureId}`,
+        fetcher,
+        { suspense: true }
+    );
+
+    const { data: state, error: stateError, mutate: mutateState } = useSWR<AdventureState>(
+        `/api/players/adventures/${adventureId}/state`,
+        fetcher,
+        { suspense: true }
+    );
+
+    const { mutate: mutateInteractions } = useSWR(
+        '/api/players/adventures/interactions',
+        fetcher,
+        { suspense: true }
+    );
 
     if (adventureError) {
         return <div>Error loading adventure.</div>;
@@ -33,38 +63,50 @@ export function AdventureCard({
         return <div>Loading...</div>;
     }
 
-    const handleFavorite = async () => {
+    const handleFavorite = useCallback(async () => {
         const method = state?.isFavorited ? 'DELETE' : 'POST';
         const response = await fetch(`/api/players/adventures/${adventureId}/favorite`, {
             method,
+            headers: {
+                'Authorization': `Bearer ${await getToken()}`,
+                'Content-Type': 'application/json',
+            },
         });
         if (response.ok) {
             mutateState();
             mutateInteractions();
         }
-    };
+    }, [state?.isFavorited, adventureId, getToken, mutateState, mutateInteractions]);
 
-    const handleLike = async () => {
+    const handleLike = useCallback(async () => {
         const method = state?.isLiked ? 'DELETE' : 'POST';
         const response = await fetch(`/api/players/adventures/${adventureId}/like`, {
             method,
+            headers: {
+                'Authorization': `Bearer ${await getToken()}`,
+                'Content-Type': 'application/json',
+            },
         });
         if (response.ok) {
             mutateState();
             mutateInteractions();
         }
-    };
+    }, [state?.isLiked, adventureId, getToken, mutateState, mutateInteractions]);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         const method = state?.isSaved ? 'DELETE' : 'POST';
         const response = await fetch(`/api/players/adventures/${adventureId}/save`, {
             method,
+            headers: {
+                'Authorization': `Bearer ${await getToken()}`,
+                'Content-Type': 'application/json',
+            },
         });
         if (response.ok) {
             mutateState();
             mutateInteractions();
         }
-    };
+    }, [state?.isSaved, adventureId, getToken, mutateState, mutateInteractions]);
 
     return (
         <motion.div
