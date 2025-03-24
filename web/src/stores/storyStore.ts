@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
-import { Node, Edge, Connection, addEdge } from 'reactflow';
+import { Node, Edge, Connection, addEdge } from '@xyflow/react';
 
 export interface StoryNode {
     id: string;
