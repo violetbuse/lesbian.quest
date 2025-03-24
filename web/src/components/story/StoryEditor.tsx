@@ -141,7 +141,7 @@ export function StoryEditor({ showToast }: StoryEditorProps) {
     );
 
     return (
-        <div className="fixed inset-0 top-16 bg-gray-50 dark:bg-gray-900">
+        <div className="w-full h-[600px] bg-gray-50 dark:bg-gray-900 rounded-lg relative">
             <div className="absolute top-4 left-4 z-50 flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
                 <button
                     onClick={() => handleAddNode('scene')}

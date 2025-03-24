@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import useSWR from 'swr';
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { useToast } from '../components/Toast';
 import { Adventure } from '../types';
@@ -149,7 +149,7 @@ export function EditAdventurePage() {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
             <Navbar />
             <main className="pt-24 pb-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col lg:flex-row gap-6">
                         {/* Mobile Form */}
                         <div className="lg:hidden">
@@ -192,6 +192,63 @@ export function EditAdventurePage() {
 
                         {/* Desktop Layout */}
                         <div className="hidden lg:flex flex-1 gap-6">
+                            {/* Sidebar */}
+                            <Collapsible.Root
+                                open={isSidebarOpen}
+                                onOpenChange={setIsSidebarOpen}
+                                className="relative"
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm h-full transition-all duration-300 ${isSidebarOpen ? 'w-80' : 'w-12'}`}
+                                >
+                                    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                                        {isSidebarOpen && <h2 className={`text-lg font-semibold text-gray-900 dark:text-white transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                                            Edit Details
+                                        </h2>}
+                                        <button
+                                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                            className="flex items-center justify-center w-5 h-5"
+                                        >
+                                            {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                                        </button>
+                                    </div>
+                                    <Collapsible.Content className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+                                        <div className="p-4">
+                                            <AdventureForm
+                                                title={title}
+                                                description={description}
+                                                isPublished={isPublished}
+                                                onTitleChange={handleTitleChange}
+                                                onDescriptionChange={handleDescriptionChange}
+                                                onPublishedChange={handlePublishedChange}
+                                                onSubmit={handleSubmit}
+                                                isSubmitting={isSubmitting}
+                                                hasChanges={hasChanges}
+                                            />
+                                            <div className="flex justify-end gap-3 mt-6">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate('/my-adventures')}
+                                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    onClick={handleSubmit}
+                                                    disabled={isSubmitting || !hasChanges()}
+                                                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </Collapsible.Content>
+                                </motion.div>
+                            </Collapsible.Root>
+
                             {/* Main Content */}
                             <div className="flex-1">
                                 <motion.div
@@ -199,62 +256,9 @@ export function EditAdventurePage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6"
                                 >
-                                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Adventure</h1>
-                                    <div className="prose dark:prose-invert max-w-none mb-6">
-                                        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-                                        <p className="text-gray-600 dark:text-gray-300">{description}</p>
-                                    </div>
                                     <StoryEditor showToast={showToast} />
                                 </motion.div>
                             </div>
-
-                            {/* Sidebar */}
-                            <Collapsible.Root
-                                open={isSidebarOpen}
-                                onOpenChange={setIsSidebarOpen}
-                                className="w-80"
-                            >
-                                <motion.div
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    className="bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-                                >
-                                    <Collapsible.Trigger className="w-full flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Details</h2>
-                                        {isSidebarOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                                    </Collapsible.Trigger>
-                                    <Collapsible.Content className="p-4">
-                                        <AdventureForm
-                                            title={title}
-                                            description={description}
-                                            isPublished={isPublished}
-                                            onTitleChange={handleTitleChange}
-                                            onDescriptionChange={handleDescriptionChange}
-                                            onPublishedChange={handlePublishedChange}
-                                            onSubmit={handleSubmit}
-                                            isSubmitting={isSubmitting}
-                                            hasChanges={hasChanges}
-                                        />
-                                        <div className="flex justify-end gap-3 mt-6">
-                                            <button
-                                                type="button"
-                                                onClick={() => navigate('/my-adventures')}
-                                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                onClick={handleSubmit}
-                                                disabled={isSubmitting || !hasChanges()}
-                                                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-500 dark:bg-purple-500 dark:hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {isSubmitting ? 'Saving...' : 'Save Changes'}
-                                            </button>
-                                        </div>
-                                    </Collapsible.Content>
-                                </motion.div>
-                            </Collapsible.Root>
                         </div>
                     </div>
                 </div>
