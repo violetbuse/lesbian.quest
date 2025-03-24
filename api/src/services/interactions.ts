@@ -11,6 +11,13 @@ export interface UserInteractions {
     played: any[];
 }
 
+export interface AdventureState {
+    isFavorited: boolean;
+    isLiked: boolean;
+    isSaved: boolean;
+    isPlayed: boolean;
+}
+
 export class InteractionsService {
     private db;
 
@@ -148,6 +155,43 @@ export class InteractionsService {
             likes: likesList.map(l => l.adventure),
             saves: savesList.map(s => s.adventure),
             played: playedList.map(p => p.adventure),
+        };
+    }
+
+    // Get state of a specific adventure
+    async getAdventureState(userId: string, adventureId: string): Promise<AdventureState> {
+        const [favorite, like, save, progress] = await Promise.all([
+            this.db.query.favorites.findFirst({
+                where: and(
+                    eq(favorites.userId, userId),
+                    eq(favorites.adventureId, adventureId)
+                ),
+            }),
+            this.db.query.likes.findFirst({
+                where: and(
+                    eq(likes.userId, userId),
+                    eq(likes.adventureId, adventureId)
+                ),
+            }),
+            this.db.query.saves.findFirst({
+                where: and(
+                    eq(saves.userId, userId),
+                    eq(saves.adventureId, adventureId)
+                ),
+            }),
+            this.db.query.playerProgress.findFirst({
+                where: and(
+                    eq(playerProgress.userId, userId),
+                    eq(playerProgress.adventureId, adventureId)
+                ),
+            }),
+        ]);
+
+        return {
+            isFavorited: !!favorite,
+            isLiked: !!like,
+            isSaved: !!save,
+            isPlayed: !!progress,
         };
     }
 } 

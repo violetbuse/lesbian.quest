@@ -15,6 +15,12 @@ describe('Interactions API', () => {
         email: 'test@test.com',
     };
 
+    const OTHER_USER = {
+        id: 'other-user',
+        username: 'other',
+        email: 'other@test.com',
+    };
+
     const TEST_ADVENTURE = {
         title: 'Test Adventure',
         description: 'A test adventure',
@@ -23,6 +29,7 @@ describe('Interactions API', () => {
 
     beforeEach(async () => {
         await create_test_user(TEST_USER.id, TEST_USER.username, TEST_USER.email);
+        await create_test_user(OTHER_USER.id, OTHER_USER.username, OTHER_USER.email);
     });
 
     describe('POST /api/players/adventures/:adventureId/favorite', () => {
@@ -332,6 +339,266 @@ describe('Interactions API', () => {
 
             expect(response.status).toBe(401);
             expect(await response.json()).toEqual({ error: 'Unauthorized' });
+        });
+    });
+
+    describe('Interactions with other users\' adventures', () => {
+        it('should allow liking adventures created by other users', async () => {
+            const otherUserAdventure = await create_test_adventure(OTHER_USER.id, TEST_ADVENTURE);
+            const response = await make_interactions_request(`/${otherUserAdventure.id}/like`, {
+                method: 'POST',
+            });
+
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({ success: true });
+        });
+
+        it('should allow saving adventures created by other users', async () => {
+            const otherUserAdventure = await create_test_adventure(OTHER_USER.id, TEST_ADVENTURE);
+            const response = await make_interactions_request(`/${otherUserAdventure.id}/save`, {
+                method: 'POST',
+            });
+
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({ success: true });
+        });
+
+        it('should allow favoriting adventures created by other users', async () => {
+            const otherUserAdventure = await create_test_adventure(OTHER_USER.id, TEST_ADVENTURE);
+            const response = await make_interactions_request(`/${otherUserAdventure.id}/favorite`, {
+                method: 'POST',
+            });
+
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({ success: true });
+        });
+
+        it('should include other users\' adventures in interactions list', async () => {
+            const otherUserAdventure = await create_test_adventure(OTHER_USER.id, TEST_ADVENTURE);
+
+            // Add interactions with other user's adventure
+            await make_interactions_request(`/${otherUserAdventure.id}/like`, {
+                method: 'POST',
+            });
+            await make_interactions_request(`/${otherUserAdventure.id}/save`, {
+                method: 'POST',
+            });
+            await make_interactions_request(`/${otherUserAdventure.id}/favorite`, {
+                method: 'POST',
+            });
+
+            const response = await make_interactions_request('/interactions');
+            expect(response.status).toBe(200);
+            const data = await response.json() as { favorites: any[], likes: any[], saves: any[], played: any[] };
+
+            expect(data.likes).toHaveLength(1);
+            expect(data.saves).toHaveLength(1);
+            expect(data.favorites).toHaveLength(1);
+
+            // Verify the adventure details are correct
+            expect(data.likes[0]).toEqual({
+                id: otherUserAdventure.id,
+                title: otherUserAdventure.title,
+                description: otherUserAdventure.description,
+                isPublished: otherUserAdventure.isPublished,
+                authorId: otherUserAdventure.authorId,
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+            });
+        });
+    });
+
+    describe('GET /api/players/adventures/:adventureId/state', () => {
+        it('should return 401 when not authenticated', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+            const response = await make_interactions_request(`/${adventure.id}/state`, {
+                authenticated: false,
+            });
+
+            expect(response.status).toBe(401);
+            expect(await response.json()).toEqual({ error: 'Unauthorized' });
+        });
+
+        it('should return all false when no interactions exist', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: false,
+                isSaved: false,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state when adventure is favorited', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+
+            // Favorite the adventure
+            await make_interactions_request(`/${adventure.id}/favorite`, {
+                method: 'POST',
+            });
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: true,
+                isLiked: false,
+                isSaved: false,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state when adventure is liked', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+
+            // Like the adventure
+            await make_interactions_request(`/${adventure.id}/like`, {
+                method: 'POST',
+            });
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: true,
+                isSaved: false,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state when adventure is saved', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+
+            // Save the adventure
+            await make_interactions_request(`/${adventure.id}/save`, {
+                method: 'POST',
+            });
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: false,
+                isSaved: true,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state when adventure is played', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+            const scene = await create_test_scene(adventure.id, {
+                title: 'Start Scene',
+                content: 'Welcome to the adventure!',
+                isStartScene: true,
+                order: 1,
+            });
+
+            // Create progress for the adventure
+            await create_test_progress(TEST_USER.id, {
+                adventureId: adventure.id,
+                currentSceneId: scene.id,
+                variables: {},
+            });
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: false,
+                isSaved: false,
+                isPlayed: true,
+            });
+        });
+
+        it('should return correct state when adventure has multiple interactions', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+            const scene = await create_test_scene(adventure.id, {
+                title: 'Start Scene',
+                content: 'Welcome to the adventure!',
+                isStartScene: true,
+                order: 1,
+            });
+
+            // Add all interactions
+            await Promise.all([
+                make_interactions_request(`/${adventure.id}/favorite`, { method: 'POST' }),
+                make_interactions_request(`/${adventure.id}/like`, { method: 'POST' }),
+                make_interactions_request(`/${adventure.id}/save`, { method: 'POST' }),
+                create_test_progress(TEST_USER.id, {
+                    adventureId: adventure.id,
+                    currentSceneId: scene.id,
+                    variables: {},
+                }),
+            ]);
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: true,
+                isLiked: true,
+                isSaved: true,
+                isPlayed: true,
+            });
+        });
+
+        it('should return correct state after removing interactions', async () => {
+            const adventure = await create_test_adventure(TEST_USER.id, TEST_ADVENTURE);
+
+            // Add all interactions
+            await Promise.all([
+                make_interactions_request(`/${adventure.id}/favorite`, { method: 'POST' }),
+                make_interactions_request(`/${adventure.id}/like`, { method: 'POST' }),
+                make_interactions_request(`/${adventure.id}/save`, { method: 'POST' }),
+            ]);
+
+            // Remove some interactions
+            await Promise.all([
+                make_interactions_request(`/${adventure.id}/favorite`, { method: 'DELETE' }),
+                make_interactions_request(`/${adventure.id}/like`, { method: 'DELETE' }),
+            ]);
+
+            const response = await make_interactions_request(`/${adventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: false,
+                isSaved: true,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state for non-existent adventure', async () => {
+            const response = await make_interactions_request('/non-existent-id/state');
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: false,
+                isSaved: false,
+                isPlayed: false,
+            });
+        });
+
+        it('should return correct state for other user\'s adventure', async () => {
+            const otherUserAdventure = await create_test_adventure(OTHER_USER.id, TEST_ADVENTURE);
+
+            // Add interactions with other user's adventure
+            await make_interactions_request(`/${otherUserAdventure.id}/like`, {
+                method: 'POST',
+            });
+            await make_interactions_request(`/${otherUserAdventure.id}/save`, {
+                method: 'POST',
+            });
+
+            const response = await make_interactions_request(`/${otherUserAdventure.id}/state`);
+            expect(response.status).toBe(200);
+            expect(await response.json()).toEqual({
+                isFavorited: false,
+                isLiked: true,
+                isSaved: true,
+                isPlayed: false,
+            });
         });
     });
 }); 

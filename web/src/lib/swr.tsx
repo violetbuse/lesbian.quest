@@ -10,18 +10,18 @@ function useAuthenticatedFetcher() {
   return async (url: string) => {
     const token = await getToken();
     // console.log({token})
-    
+
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
       throw new Error('An error occurred while fetching the data.');
     }
-    
+
     return response.json();
   };
 }
@@ -29,12 +29,12 @@ function useAuthenticatedFetcher() {
 // Create a wrapper component that provides the authenticated fetcher
 function AuthenticatedSWRConfig({ children }: { children: ReactNode }) {
   const fetcher = useAuthenticatedFetcher();
-  
+
   const config: SWRConfiguration = {
     fetcher,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
-    refreshInterval: 1000
+    refreshInterval: 5000
   };
 
   return (

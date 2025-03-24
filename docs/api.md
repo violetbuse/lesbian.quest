@@ -35,6 +35,7 @@ This document provides comprehensive documentation for all API routes in the Les
     - [Save an Adventure](#save-an-adventure)
     - [Remove Save](#remove-save)
     - [Get User Interactions](#get-user-interactions)
+    - [Get Adventure State](#get-adventure-state)
 - [Error Responses](#error-responses)
 - [Data Validation](#data-validation)
 
@@ -849,6 +850,40 @@ Retrieves all user interactions (favorites, likes, saves, and played adventures)
 
 **Error Responses:**
 - `401 Unauthorized`: When the user is not authenticated
+
+#### Get Adventure State
+```http
+GET /api/players/adventures/:adventureId/state
+```
+
+Retrieves the current state of all interactions for a specific adventure.
+
+**Parameters:**
+- `adventureId` (path parameter): The ID of the adventure to get the state for
+
+**Response:**
+```json
+{
+    "isFavorited": true,
+    "isLiked": false,
+    "isSaved": true,
+    "isPlayed": true
+}
+```
+
+**Response Fields:**
+- `isFavorited` (boolean): Whether the adventure is in the user's favorites
+- `isLiked` (boolean): Whether the user has liked the adventure
+- `isSaved` (boolean): Whether the adventure is saved by the user
+- `isPlayed` (boolean): Whether the user has started playing the adventure
+
+**Error Responses:**
+- `401 Unauthorized`: When the user is not authenticated
+
+**Notes:**
+- Returns all states as `false` for non-existent adventures
+- Works with both the user's own adventures and other users' adventures
+- The `isPlayed` state is determined by the existence of player progress for the adventure
 
 ## Error Responses
 

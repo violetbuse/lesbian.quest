@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { MyAdventuresPage } from './pages/MyAdventuresPage';
 import { SWRProvider } from './lib/swr';
 import { ThemeProvider } from './components/ThemeProvider';
+import { ToastProvider } from './components/Toast';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -16,12 +17,14 @@ function App() {
     <ThemeProvider>
       <ClerkProvider publishableKey={clerkPubKey}>
         <SWRProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/my-adventures" element={<MyAdventuresPage />} />
-            </Routes>
-          </Router>
+          <ToastProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/my-adventures" element={<MyAdventuresPage />} />
+              </Routes>
+            </Router>
+          </ToastProvider>
         </SWRProvider>
       </ClerkProvider>
     </ThemeProvider>

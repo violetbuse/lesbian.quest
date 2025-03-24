@@ -117,4 +117,18 @@ app.get('/interactions', async (c) => {
     return c.json(interactions);
 });
 
+// Get state of a specific adventure
+app.get('/:adventureId/state', zValidator('param', adventureIdSchema), async (c) => {
+    const userId = await getUserFromContext(c);
+    if (!userId) {
+        return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const { adventureId } = c.req.valid('param');
+    const interactionsService = new InteractionsService(c.env.DB);
+
+    const state = await interactionsService.getAdventureState(userId, adventureId);
+    return c.json(state);
+});
+
 export default app; 

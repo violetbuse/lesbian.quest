@@ -4,7 +4,10 @@ import useSWR from 'swr';
 import { useAuth } from '@clerk/clerk-react';
 import { CreateAdventureModal } from '../components/CreateAdventureModal';
 import { Navbar } from '../components/Navbar';
+import { AdventureCard } from '../components/AdventureCard';
+import { useToast } from '../components/Toast';
 import { Adventure } from '../types';
+import { Star, Heart, Bookmark, PenSquare } from 'lucide-react';
 
 const AdventureCardSkeleton = () => (
   <motion.div
@@ -26,6 +29,7 @@ const AdventureCardSkeleton = () => (
 export function MyAdventuresPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { getToken } = useAuth();
+  const { showToast } = useToast();
   const { data: createdAdventures, error: createdError, isLoading: isLoadingCreated, mutate: mutateCreated } = useSWR<Adventure[]>('/api/creators/adventures');
   const { data: interactions, error: interactionsError, isLoading: isLoadingInteractions, mutate: mutateInteractions } = useSWR<{
     favorites: Adventure[];
@@ -47,135 +51,15 @@ export function MyAdventuresPage() {
       }
       const newAdventure = await response.json();
       mutateCreated([...(createdAdventures || []), newAdventure]);
+      showToast('Adventure created successfully!', 'success');
     } catch (err) {
       console.error('Failed to create adventure:', err);
+      showToast('Failed to create adventure. Please try again.');
     }
   };
-
-  const handleFavorite = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/favorite`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to favorite adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to favorite adventure:', err);
-    }
-  };
-
-  const handleUnfavorite = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/favorite`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to unfavorite adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to unfavorite adventure:', err);
-    }
-  };
-
-  const handleLike = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/like`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to like adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to like adventure:', err);
-    }
-  };
-
-  const handleUnlike = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/like`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to unlike adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to unlike adventure:', err);
-    }
-  };
-
-  const handleSave = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/save`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to save adventure:', err);
-    }
-  };
-
-  const handleUnsave = async (adventureId: string) => {
-    try {
-      const response = await fetch(`/api/players/adventures/${adventureId}/save`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to unsave adventure');
-      }
-      mutateInteractions();
-    } catch (err) {
-      console.error('Failed to unsave adventure:', err);
-    }
-  };
-
-  const AdventureCard = ({ adventure, type }: { adventure: Adventure; type: 'created' | 'favorite' | 'like' | 'save' }) => (
-    <motion.div
-      key={adventure.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-center gap-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white min-w-[200px]">{adventure.title}</h2>
-        <p className="text-gray-500 dark:text-gray-400 flex-1 truncate">{adventure.description}</p>
-        <p className="text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap">
-          {new Date(adventure.createdAt).toLocaleDateString()}
-        </p>
-        {type === 'created' && (
-          <div className="flex gap-2 whitespace-nowrap">
-            <button
-              onClick={() => handleFavorite(adventure.id)}
-              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
-            >
-              Favorite
-            </button>
-            <button
-              onClick={() => handleLike(adventure.id)}
-              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
-            >
-              Like
-            </button>
-            <button
-              onClick={() => handleSave(adventure.id)}
-              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
-            >
-              Save
-            </button>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
 
   if (createdError) {
+    showToast('Failed to load created adventures');
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
@@ -189,6 +73,7 @@ export function MyAdventuresPage() {
   }
 
   if (interactionsError) {
+    showToast('Failed to load interactions');
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         <Navbar />
@@ -201,10 +86,45 @@ export function MyAdventuresPage() {
     );
   }
 
-  const adventures = createdAdventures || [];
-  const favorites = interactions?.favorites || [];
-  const likes = interactions?.likes || [];
-  const saves = interactions?.saves || [];
+  // Combine and deduplicate adventures
+  const allAdventures = new Map<string, { adventure: Adventure; types: Set<string> }>();
+
+  // Add created adventures
+  createdAdventures?.forEach(adventure => {
+    allAdventures.set(adventure.id, { adventure, types: new Set(['created']) });
+  });
+
+  // Add favorites
+  interactions?.favorites.forEach(adventure => {
+    const existing = allAdventures.get(adventure.id);
+    if (existing) {
+      existing.types.add('favorite');
+    } else {
+      allAdventures.set(adventure.id, { adventure, types: new Set(['favorite']) });
+    }
+  });
+
+  // Add likes
+  interactions?.likes.forEach(adventure => {
+    const existing = allAdventures.get(adventure.id);
+    if (existing) {
+      existing.types.add('like');
+    } else {
+      allAdventures.set(adventure.id, { adventure, types: new Set(['like']) });
+    }
+  });
+
+  // Add saves
+  interactions?.saves.forEach(adventure => {
+    const existing = allAdventures.get(adventure.id);
+    if (existing) {
+      existing.types.add('save');
+    } else {
+      allAdventures.set(adventure.id, { adventure, types: new Set(['save']) });
+    }
+  });
+
+  const uniqueAdventures = Array.from(allAdventures.values());
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
@@ -223,41 +143,12 @@ export function MyAdventuresPage() {
           </div>
 
           {isLoadingCreated && isLoadingInteractions ? (
-            <div className="space-y-8">
-              <section>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Created Adventures</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <AdventureCardSkeleton key={i} />
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Favorites</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <AdventureCardSkeleton key={i} />
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Liked Adventures</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <AdventureCardSkeleton key={i} />
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Saved Adventures</h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <AdventureCardSkeleton key={i} />
-                  ))}
-                </div>
-              </section>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <AdventureCardSkeleton key={i} />
+              ))}
             </div>
-          ) : adventures.length === 0 && favorites.length === 0 && likes.length === 0 && saves.length === 0 ? (
+          ) : uniqueAdventures.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -272,50 +163,15 @@ export function MyAdventuresPage() {
               </button>
             </motion.div>
           ) : (
-            <div className="space-y-8">
-              {adventures.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Created Adventures</h2>
-                  <div className="space-y-4">
-                    {adventures.map((adventure) => (
-                      <AdventureCard key={adventure.id} adventure={adventure} type="created" />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {favorites.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Favorites</h2>
-                  <div className="space-y-4">
-                    {favorites.map((adventure) => (
-                      <AdventureCard key={adventure.id} adventure={adventure} type="favorite" />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {likes.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Liked Adventures</h2>
-                  <div className="space-y-4">
-                    {likes.map((adventure) => (
-                      <AdventureCard key={adventure.id} adventure={adventure} type="like" />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {saves.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Saved Adventures</h2>
-                  <div className="space-y-4">
-                    {saves.map((adventure) => (
-                      <AdventureCard key={adventure.id} adventure={adventure} type="save" />
-                    ))}
-                  </div>
-                </section>
-              )}
+            <div className="space-y-4">
+              {uniqueAdventures.map(({ adventure, types }) => (
+                <div key={adventure.id}>
+                  <AdventureCard
+                    adventureId={adventure.id}
+                    type={types.has('created') ? 'created' : (Array.from(types)[0] as 'favorite' | 'like' | 'save')}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>
