@@ -20,6 +20,7 @@
     "@radix-ui/react-toast": "^1.2.6",
     "@xyflow/react": "^12.4.4",
     "framer-motion": "^12.5.0",
+    "immer": "^10.1.1",
     "lucide-react": "^0.483.0",
     "nanoid": "^5.1.5",
     "react": "^19.0.0",

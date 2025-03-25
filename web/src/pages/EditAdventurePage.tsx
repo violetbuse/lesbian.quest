@@ -256,7 +256,7 @@ export function EditAdventurePage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6"
                                 >
-                                    <StoryEditor showToast={showToast} />
+                                    <StoryEditor adventureId={adventureId || ""} showToast={showToast} />
                                 </motion.div>
                             </div>
                         </div>

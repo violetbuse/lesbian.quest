@@ -17,8 +17,9 @@ import {
 } from '@xyflow/react';
 import { SceneNode } from './SceneNode';
 import { ChoiceNode } from './ChoiceNode';
-import { useStoryStore, StoryNode } from '../../stores/storyStore';
+import { useAdventureEditor } from '../../hooks/useAdventureEditor';
 import { Plus, Trash2 } from 'lucide-react';
+import { nanoid } from 'nanoid';
 
 const nodeTypes: NodeTypes = {
     scene: SceneNode,
@@ -26,19 +27,43 @@ const nodeTypes: NodeTypes = {
 };
 
 interface StoryEditorProps {
+    adventureId: string;
     showToast: (message: string, type?: 'error' | 'success') => void;
 }
 
-export function StoryEditor({ showToast }: StoryEditorProps) {
-    const { nodes, edges, addNode, addEdge: addEdgeToStore, deleteNode, deleteEdge, setNodes, setEdges } = useStoryStore();
+interface StoryNode {
+    id: string;
+    type: 'scene' | 'choice';
+    data: {
+        title: string;
+        content: string;
+        imageUrl?: string | null;
+        isStartScene?: boolean;
+        condition?: string;
+    };
+    position: { x: number; y: number };
+}
+
+export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
+    const {
+        nodes,
+        edges,
+        addNode,
+        addEdge,
+        deleteNode,
+        deleteEdge,
+        setNodes,
+        setEdges
+    } = useAdventureEditor({ adventureId });
+
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
 
     const onConnect = useCallback(
         (connection: Connection) => {
             // Find the source and target nodes
-            const sourceNode = nodes.find((node) => node.id === connection.source);
-            const targetNode = nodes.find((node) => node.id === connection.target);
+            const sourceNode = nodes.find((node: Node) => node.id === connection.source);
+            const targetNode = nodes.find((node: Node) => node.id === connection.target);
 
             // Only allow connections between scenes and choices
             if (!sourceNode || !targetNode) return;
@@ -57,29 +82,27 @@ export function StoryEditor({ showToast }: StoryEditorProps) {
 
             // Check if the choice already has an outgoing connection
             if (sourceNode.type === 'choice') {
-                const existingConnection = edges.find(edge => edge.source === sourceNode.id);
+                const existingConnection = edges.find((edge: Edge) => edge.source === sourceNode.id);
                 if (existingConnection) {
                     showToast('A choice can only lead to one scene');
                     return;
                 }
             }
 
-            const newEdges = addEdge(
-                {
-                    ...connection,
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        width: 20,
-                        height: 20,
-                        color: '#9333ea', // purple-600
-                    },
+            const newEdge = {
+                ...connection,
+                id: nanoid(),
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 20,
+                    height: 20,
+                    color: '#9333ea', // purple-600
                 },
-                edges
-            );
-            setEdges(newEdges);
-            addEdgeToStore(connection);
+            };
+            setEdges([...edges, newEdge]);
+            addEdge(connection);
         },
-        [edges, setEdges, addEdgeToStore, nodes, showToast]
+        [edges, setEdges, addEdge, nodes, showToast]
     );
 
     const onNodesChange: OnNodesChange = useCallback(
