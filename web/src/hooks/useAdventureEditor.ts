@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useToast } from '../components/Toast';
 import { Adventure } from '../types';
 import useSWR from 'swr';
@@ -442,43 +442,49 @@ export function useAdventureEditor({ adventureId, onSuccess }: UseAdventureEdito
     });
 
     // Initialize store when data is loaded
-    if (adventureData && !store.adventure) {
-        const nodes: Node[] = [
-            ...(adventureData.scenes || []).map((scene) => ({
-                id: scene.id,
-                type: 'scene' as const,
-                data: {
-                    title: scene.title || '',
-                    content: scene.content || '',
-                    imageUrl: scene.imageUrl,
-                    isStartScene: scene.isStartScene,
-                },
-                position: { x: 0, y: 0 },
-            })),
-            ...(adventureData.choices || []).map((choice) => ({
-                id: choice.id,
-                type: 'choice' as const,
-                data: {
-                    title: choice.text || '',
-                    content: '',
-                    condition: choice.condition,
-                },
-                position: { x: 0, y: 0 },
-            })),
-        ];
+    useEffect(() => {
+        if (!adventureData?.adventure) return;
 
-        const edges: Edge[] = (adventureData.choices || []).map((choice) => ({
-            id: nanoid(),
-            source: choice.id,
-            target: choice.toSceneId || '',
-        }));
+        // Only initialize if we don't have data or if the adventure ID has changed
+        if (!store.adventure || store.adventure.id !== adventureData.adventure.id) {
+            const nodes: Node[] = [
+                ...(adventureData.scenes || []).map((scene) => ({
+                    id: scene.id,
+                    type: 'scene' as const,
+                    data: {
+                        title: scene.title || '',
+                        content: scene.content || '',
+                        imageUrl: scene.imageUrl,
+                        isStartScene: scene.isStartScene,
+                    },
+                    position: { x: 0, y: 0 },
+                })),
+                ...(adventureData.choices || []).map((choice) => ({
+                    id: choice.id,
+                    type: 'choice' as const,
+                    data: {
+                        title: choice.text || '',
+                        content: '',
+                        condition: choice.condition,
+                    },
+                    position: { x: 0, y: 0 },
+                })),
+            ];
 
-        store.setAdventure(adventureData.adventure);
-        store.setScenes(adventureData.scenes || []);
-        store.setChoices(adventureData.choices || []);
-        store.setNodes(nodes);
-        store.setEdges(edges);
-    }
+            const edges: Edge[] = (adventureData.choices || []).map((choice) => ({
+                id: nanoid(),
+                source: choice.id,
+                target: choice.toSceneId || '',
+            }));
+
+            // Batch all store updates together
+            store.setAdventure(adventureData.adventure);
+            store.setScenes(adventureData.scenes || []);
+            store.setChoices(adventureData.choices || []);
+            store.setNodes(nodes);
+            store.setEdges(edges);
+        }
+    }, [adventureData?.adventure?.id]); // Only depend on the adventure ID
 
     const saveChanges = useCallback(async () => {
         try {
@@ -491,11 +497,38 @@ export function useAdventureEditor({ adventureId, onSuccess }: UseAdventureEdito
         }
     }, [adventureId, onSuccess, showToast, mutate, store]);
 
+    // Return loading state if we don't have data yet
+    if (!adventureData) {
+        return {
+            adventure: null,
+            scenes: [],
+            choices: [],
+            isLoading: true,
+            isError: error,
+            changes: {},
+            isSubmitting: false,
+            updateAdventure: store.updateAdventure,
+            updateScene: store.updateScene,
+            updateChoice: store.updateChoice,
+            saveChanges,
+            hasChanges: () => false,
+            nodes: [],
+            edges: [],
+            addNode: store.addNode,
+            updateNode: store.updateNode,
+            deleteNode: store.deleteNode,
+            addEdge: store.addEdge,
+            deleteEdge: store.deleteEdge,
+            setNodes: store.setNodes,
+            setEdges: store.setEdges,
+        };
+    }
+
     return {
         adventure: store.adventure,
         scenes: store.scenes,
         choices: store.choices,
-        isLoading: !error && !adventureData,
+        isLoading: false,
         isError: error,
         changes: store.changes,
         isSubmitting: store.isSubmitting,

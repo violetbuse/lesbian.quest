@@ -4,14 +4,12 @@ import {
     Background,
     Controls,
     MiniMap,
-    addEdge,
     Connection,
     Node,
     NodeTypes,
     OnNodesChange,
     OnEdgesChange,
     Edge,
-    XYPosition,
     applyNodeChanges,
     MarkerType,
 } from '@xyflow/react';
@@ -49,8 +47,9 @@ export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
         nodes,
         edges,
         addNode,
-        addEdge,
+        updateNode,
         deleteNode,
+        addEdge,
         deleteEdge,
         setNodes,
         setEdges
@@ -89,20 +88,9 @@ export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
                 }
             }
 
-            const newEdge = {
-                ...connection,
-                id: nanoid(),
-                markerEnd: {
-                    type: MarkerType.ArrowClosed,
-                    width: 20,
-                    height: 20,
-                    color: '#9333ea', // purple-600
-                },
-            };
-            setEdges([...edges, newEdge]);
             addEdge(connection);
         },
-        [edges, setEdges, addEdge, nodes, showToast]
+        [edges, addEdge, nodes, showToast]
     );
 
     const onNodesChange: OnNodesChange = useCallback(
