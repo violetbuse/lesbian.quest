@@ -14,6 +14,7 @@ interface Scene {
     imageUrl?: string | null;
     isStartScene?: boolean;
     order?: number;
+    choices?: Choice[];
 }
 
 interface Choice {
@@ -165,10 +166,11 @@ const useAdventureStore = create<AdventureState & AdventureActions>((set, get) =
                         ...(state.changes.scenes || []),
                         {
                             id: newNode.id,
-                            title: node.data.title,
-                            content: node.data.content,
-                            imageUrl: node.data.imageUrl,
-                            isStartScene: node.data.isStartScene,
+                            title: node.data.title || 'Untitled Scene',
+                            content: node.data.content || 'No content provided',
+                            imageUrl: node.data.imageUrl || null,
+                            isStartScene: node.data.isStartScene ?? false,
+                            order: 0, // Default order for new scenes
                         },
                     ];
                 }
@@ -178,8 +180,11 @@ const useAdventureStore = create<AdventureState & AdventureActions>((set, get) =
                         ...(state.changes.choices || []),
                         {
                             id: newNode.id,
-                            text: node.data.title,
-                            condition: node.data.condition,
+                            text: node.data.title || 'Untitled Choice',
+                            toSceneId: '', // Will be set when connected
+                            imageUrl: node.data.imageUrl || null,
+                            condition: node.data.condition || undefined,
+                            order: 0, // Default order for new choices
                         },
                     ];
                 }
@@ -262,7 +267,7 @@ const useAdventureStore = create<AdventureState & AdventureActions>((set, get) =
                 state.changes.edges = [...(state.changes.edges || []), newEdge];
 
                 // Update the choice's toSceneId
-                if (connection.source) {
+                if (connection.source && connection.target) {
                     state.changes.choices = state.changes.choices?.map((choice) =>
                         choice.id === connection.source
                             ? {
@@ -309,69 +314,129 @@ const useAdventureStore = create<AdventureState & AdventureActions>((set, get) =
         try {
             const operations = [];
 
+            // Handle adventure updates
             if (changes.title || changes.description || changes.isPublished !== undefined) {
                 operations.push({
                     type: 'updateAdventure' as const,
                     id: adventureId,
                     data: {
-                        title: changes.title,
-                        description: changes.description,
-                        isPublished: changes.isPublished,
+                        title: changes.title || 'Untitled Adventure',
+                        description: changes.description || 'No description provided',
+                        isPublished: changes.isPublished ?? false,
                     },
                 });
             }
 
+            // Handle scene updates and creations
             if (changes.scenes?.length) {
                 for (const scene of changes.scenes) {
-                    operations.push({
-                        type: 'updateScene' as const,
-                        id: scene.id,
-                        data: {
-                            title: scene.title,
-                            content: scene.content,
-                            imageUrl: scene.imageUrl,
-                            isStartScene: scene.isStartScene,
-                            order: scene.order,
-                        },
-                    });
+                    if (!scene.id) continue; // Skip scenes without IDs
+
+                    // Check if this is a new scene (not in the original scenes array)
+                    const isNewScene = !get().scenes.some(s => s.id === scene.id);
+
+                    if (isNewScene) {
+                        operations.push({
+                            type: 'createScene' as const,
+                            adventureId,
+                            id: scene.id, // Use the generated ID
+                            data: {
+                                title: scene.title || 'Untitled Scene',
+                                content: scene.content || 'No content provided',
+                                imageUrl: scene.imageUrl || null,
+                                isStartScene: scene.isStartScene ?? false,
+                                order: scene.order ?? 0,
+                            },
+                        });
+                    } else {
+                        operations.push({
+                            type: 'updateScene' as const,
+                            id: scene.id,
+                            data: {
+                                title: scene.title || 'Untitled Scene',
+                                content: scene.content || 'No content provided',
+                                imageUrl: scene.imageUrl || null,
+                                isStartScene: scene.isStartScene ?? false,
+                                order: scene.order ?? 0,
+                            },
+                        });
+                    }
                 }
             }
 
+            // Handle choice updates and creations
             if (changes.choices?.length) {
                 for (const choice of changes.choices) {
-                    operations.push({
-                        type: 'updateChoice' as const,
-                        id: choice.id,
-                        data: {
-                            text: choice.text,
-                            toSceneId: choice.toSceneId,
-                            imageUrl: choice.imageUrl,
-                            condition: choice.condition,
-                            order: choice.order,
-                        },
-                    });
+                    if (!choice.id) continue; // Skip choices without IDs
+
+                    // Find the scene this choice belongs to
+                    const sourceScene = get().scenes.find(s =>
+                        s.choices?.some((c: Choice) => c.id === choice.id)
+                    );
+
+                    // Check if this is a new choice (not in the original choices array)
+                    const isNewChoice = !get().choices.some(c => c.id === choice.id);
+
+                    // Skip choices without a valid toSceneId
+                    if (!choice.toSceneId) continue;
+
+                    if (isNewChoice && sourceScene) {
+                        operations.push({
+                            type: 'createChoice' as const,
+                            fromSceneId: sourceScene.id,
+                            id: choice.id, // Use the generated ID
+                            data: {
+                                text: choice.text || 'Untitled Choice',
+                                toSceneId: choice.toSceneId,
+                                imageUrl: choice.imageUrl || null,
+                                condition: choice.condition || undefined,
+                                order: choice.order ?? 0,
+                            },
+                        });
+                    } else {
+                        operations.push({
+                            type: 'updateChoice' as const,
+                            id: choice.id,
+                            data: {
+                                text: choice.text || 'Untitled Choice',
+                                toSceneId: choice.toSceneId,
+                                imageUrl: choice.imageUrl || null,
+                                condition: choice.condition || undefined,
+                                order: choice.order ?? 0,
+                            },
+                        });
+                    }
                 }
             }
 
-            const response = await fetch('/api/creators/atomic', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ operations }),
-            });
+            // Only make the API call if we have operations to perform
+            if (operations.length > 0) {
+                const response = await fetch('/api/creators/atomic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ operations }),
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to save changes');
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('You are not authorized to make these changes. Please make sure you are logged in and have permission to edit this adventure.');
+                    }
+                    throw new Error(result.error?.message || 'Failed to save changes');
+                }
+
+                if (!result.success) {
+                    const errorMessage = result.results?.[0]?.error || 'Failed to save changes';
+                    throw new Error(errorMessage);
+                }
+
+                // Only clear changes if the save was successful
+                set({ changes: {} });
+                onSuccess?.();
             }
-
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.results[0]?.error || 'Failed to save changes');
-            }
-
-            set({ changes: {} });
-            onSuccess?.();
         } catch (err) {
             console.error('Failed to save changes:', err);
             throw err;

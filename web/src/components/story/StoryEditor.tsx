@@ -88,9 +88,24 @@ export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
                 }
             }
 
+            // Create the edge with a consistent ID
+            const edgeId = nanoid();
+            const newEdge = {
+                ...connection,
+                id: edgeId,
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 20,
+                    height: 20,
+                    color: '#9333ea', // purple-600
+                },
+            };
+
+            // Add the edge to both the store and visual edges
             addEdge(connection);
+            setEdges([...edges, newEdge]);
         },
-        [edges, addEdge, nodes, showToast]
+        [edges, addEdge, setEdges, nodes, showToast]
     );
 
     const onNodesChange: OnNodesChange = useCallback(
@@ -119,6 +134,8 @@ export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
 
     const handleAddNode = useCallback(
         (type: 'scene' | 'choice') => {
+            const nodeId = nanoid(); // Generate a single ID to use for both store and visual node
+
             const newNode: Omit<StoryNode, 'id'> = {
                 type,
                 data: {
@@ -130,25 +147,47 @@ export function StoryEditor({ adventureId, showToast }: StoryEditorProps) {
                     y: Math.random() * 500,
                 },
             };
+
+            // Add the node to the store with the same ID
             addNode(newNode);
+
+            // Update the visual nodes with the same ID
+            const nodeWithId = {
+                ...newNode,
+                id: nodeId,
+            };
+            setNodes([...nodes, nodeWithId]);
         },
-        [addNode]
+        [addNode, setNodes, nodes]
     );
 
     const handleDeleteNode = useCallback(
         (nodeId: string) => {
+            // Delete from store
             deleteNode(nodeId);
+
+            // Delete from visual nodes
+            setNodes(nodes.filter(node => node.id !== nodeId));
+
+            // Delete connected edges
+            setEdges(edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
+
             setSelectedNode(null);
         },
-        [deleteNode]
+        [deleteNode, setNodes, setEdges, nodes, edges]
     );
 
     const handleDeleteEdge = useCallback(
         (edgeId: string) => {
+            // Delete from store
             deleteEdge(edgeId);
+
+            // Delete from visual edges
+            setEdges(edges.filter(edge => edge.id !== edgeId));
+
             setSelectedEdge(null);
         },
-        [deleteEdge]
+        [deleteEdge, setEdges, edges]
     );
 
     return (

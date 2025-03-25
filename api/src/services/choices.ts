@@ -21,11 +21,11 @@ export class ChoiceService {
         this.db = createDb(d1);
     }
 
-    async createChoice(fromSceneId: string, data: CreateChoiceData) {
+    async createChoice(fromSceneId: string, data: CreateChoiceData, id?: string) {
         const choice = await this.db
             .insert(choices)
             .values({
-                id: nanoid(),
+                id: id ?? nanoid(),
                 fromSceneId,
                 toSceneId: data.toSceneId,
                 text: data.text,

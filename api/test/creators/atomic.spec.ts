@@ -323,5 +323,176 @@ describe('atomic', async () => {
                 description: 'Should not be modifiable by others'
             });
         });
+
+        it('should create scenes and choices with specified IDs', async () => {
+            await create_test_user('123', 'test', 'test@test.com');
+
+            const response = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '123',
+                username: 'test',
+                email: 'test@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createAdventure',
+                            data: {
+                                title: 'ID Test Adventure',
+                                description: 'Testing specified IDs'
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const body = await response.json() as any;
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            const adventureId = body.results[0].id;
+
+            // Create scenes with specified IDs
+            const scenesResponse = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '123',
+                username: 'test',
+                email: 'test@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createScene',
+                            adventureId,
+                            id: 'scene-1',
+                            data: {
+                                title: 'First Scene',
+                                content: 'With specified ID',
+                                order: 0
+                            }
+                        },
+                        {
+                            type: 'createScene',
+                            adventureId,
+                            id: 'scene-2',
+                            data: {
+                                title: 'Second Scene',
+                                content: 'Also with specified ID',
+                                order: 1
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const scenesBody = await scenesResponse.json() as any;
+            expect(scenesResponse.status).toBe(200);
+            expect(scenesBody.success).toBe(true);
+            expect(scenesBody.results[0].id).toBe('scene-1');
+            expect(scenesBody.results[1].id).toBe('scene-2');
+
+            // Create a choice with specified ID
+            const choiceResponse = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '123',
+                username: 'test',
+                email: 'test@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createChoice',
+                            fromSceneId: 'scene-1',
+                            id: 'choice-1',
+                            data: {
+                                text: 'Go to second scene',
+                                toSceneId: 'scene-2',
+                                order: 0
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const choiceBody = await choiceResponse.json() as any;
+            expect(choiceResponse.status).toBe(200);
+            expect(choiceBody.success).toBe(true);
+            expect(choiceBody.results[0].id).toBe('choice-1');
+        });
+
+        it('should fail when trying to create with an existing ID', async () => {
+            await create_test_user('456', 'test2', 'test2@test.com');
+
+            // First create a scene
+            const setupResponse = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '456',
+                username: 'test2',
+                email: 'test2@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createAdventure',
+                            data: {
+                                title: 'Duplicate ID Test',
+                                description: 'Testing duplicate IDs'
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const setupBody = await setupResponse.json() as any;
+            const adventureId = setupBody.results[0].id;
+
+            // Create a scene with a specific ID
+            const sceneResponse = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '456',
+                username: 'test2',
+                email: 'test2@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createScene',
+                            adventureId,
+                            id: 'duplicate-scene',
+                            data: {
+                                title: 'Original Scene',
+                                content: 'First creation',
+                                order: 0
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const sceneBody = await sceneResponse.json() as any;
+            expect(sceneResponse.status).toBe(200);
+            expect(sceneBody.success).toBe(true);
+
+            // Try to create another scene with the same ID
+            const duplicateResponse = await make_request('atomic', '', {
+                method: 'POST',
+                userId: '456',
+                username: 'test2',
+                email: 'test2@test.com',
+                body: {
+                    operations: [
+                        {
+                            type: 'createScene',
+                            adventureId,
+                            id: 'duplicate-scene',
+                            data: {
+                                title: 'Duplicate Scene',
+                                content: 'Should fail',
+                                order: 1
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const duplicateBody = await duplicateResponse.json() as any;
+            expect(duplicateResponse.status).toBe(200);
+            expect(duplicateBody.success).toBe(false);
+            expect(duplicateBody.results[0].error).toContain('UNIQUE constraint failed');
+        });
     });
 }); 

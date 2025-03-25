@@ -482,14 +482,129 @@ Performs atomic operations for creating, updating, or deleting adventure content
 {
     "operations": [
         {
-            "type": "createAdventure" | "updateAdventure" | "deleteAdventure" | "createScene" | "updateScene" | "deleteScene",
+            "type": "createAdventure" | "updateAdventure" | "deleteAdventure" | "createScene" | "updateScene" | "deleteScene" | "createChoice" | "updateChoice" | "deleteChoice",
             "data": {
                 // Operation-specific data
             },
-            "id": "string (required for update/delete operations)",
-            "adventureId": "string (required for createScene)"
+            "id": "string (required for update/delete operations, optional for create operations)",
+            "adventureId": "string (required for createScene)",
+            "fromSceneId": "string (required for createChoice)"
         }
     ]
+}
+```
+
+**Operation Types and Their Data:**
+
+1. `createAdventure`:
+```json
+{
+    "type": "createAdventure",
+    "data": {
+        "title": "string (1-100 chars)",
+        "description": "string (1-1000 chars)",
+        "isPublished": "boolean (optional)"
+    }
+}
+```
+
+2. `updateAdventure`:
+```json
+{
+    "type": "updateAdventure",
+    "id": "string",
+    "data": {
+        "title": "string (1-100 chars)",
+        "description": "string (1-1000 chars)",
+        "isPublished": "boolean (optional)"
+    }
+}
+```
+
+3. `deleteAdventure`:
+```json
+{
+    "type": "deleteAdventure",
+    "id": "string"
+}
+```
+
+4. `createScene`:
+```json
+{
+    "type": "createScene",
+    "adventureId": "string",
+    "id": "string (optional)",
+    "data": {
+        "title": "string (1-100 chars)",
+        "content": "string",
+        "imageUrl": "string (URL, optional)",
+        "isStartScene": "boolean (optional)",
+        "order": "number (integer, min 0)"
+    }
+}
+```
+
+5. `updateScene`:
+```json
+{
+    "type": "updateScene",
+    "id": "string",
+    "data": {
+        "title": "string (1-100 chars)",
+        "content": "string",
+        "imageUrl": "string (URL, optional)",
+        "isStartScene": "boolean (optional)",
+        "order": "number (integer, min 0)"
+    }
+}
+```
+
+6. `deleteScene`:
+```json
+{
+    "type": "deleteScene",
+    "id": "string",
+    "redirectProgressionToSceneId": "string"
+}
+```
+
+7. `createChoice`:
+```json
+{
+    "type": "createChoice",
+    "fromSceneId": "string",
+    "id": "string (optional)",
+    "data": {
+        "text": "string (1-500 chars)",
+        "toSceneId": "string",
+        "imageUrl": "string (URL, optional)",
+        "condition": "string (optional)",
+        "order": "number (integer, min 0)"
+    }
+}
+```
+
+8. `updateChoice`:
+```json
+{
+    "type": "updateChoice",
+    "id": "string",
+    "data": {
+        "text": "string (1-500 chars)",
+        "toSceneId": "string",
+        "imageUrl": "string (URL, optional)",
+        "condition": "string (optional)",
+        "order": "number (integer, min 0)"
+    }
+}
+```
+
+9. `deleteChoice`:
+```json
+{
+    "type": "deleteChoice",
+    "id": "string"
 }
 ```
 
@@ -517,6 +632,19 @@ Performs atomic operations for creating, updating, or deleting adventure content
     "error": "Resource not found"
 }
 ```
+- 500 Internal Server Error:
+```json
+{
+    "success": false,
+    "error": "string"
+}
+```
+
+**Notes:**
+- All operations in a batch are executed in sequence within a transaction
+- If any operation fails, the entire batch is rolled back
+- For create operations, if an ID is provided but already exists, the operation will fail
+- For create operations without an ID, a new ID will be automatically generated
 
 ## Player Routes
 

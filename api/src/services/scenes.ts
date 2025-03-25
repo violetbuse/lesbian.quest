@@ -41,11 +41,11 @@ export class SceneService {
         this.db = createDb(d1);
     }
 
-    async createScene(adventureId: string, data: CreateSceneData) {
+    async createScene(adventureId: string, data: CreateSceneData, id?: string) {
         const scene = await this.db
             .insert(scenes)
             .values({
-                id: nanoid(),
+                id: id ?? nanoid(),
                 adventureId,
                 title: data.title,
                 content: data.content,

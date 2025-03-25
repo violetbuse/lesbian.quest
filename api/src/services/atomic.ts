@@ -10,10 +10,10 @@ export type AtomicOperation =
     | { type: 'createAdventure'; data: { title: string; description: string; isPublished?: boolean; } }
     | { type: 'updateAdventure'; id: string; data: { title: string; description: string; isPublished?: boolean; } }
     | { type: 'deleteAdventure'; id: string; }
-    | { type: 'createScene'; adventureId: string; data: { title: string; content: string; imageUrl?: string | null; isStartScene?: boolean; order: number; } }
+    | { type: 'createScene'; adventureId: string; id?: string; data: { title: string; content: string; imageUrl?: string | null; isStartScene?: boolean; order: number; } }
     | { type: 'updateScene'; id: string; data: { title: string; content: string; imageUrl?: string | null; isStartScene?: boolean; order: number; } }
     | { type: 'deleteScene'; id: string; redirectProgressionToSceneId: string; }
-    | { type: 'createChoice'; fromSceneId: string; data: { text: string; toSceneId: string; imageUrl?: string | null; condition?: string; order: number; } }
+    | { type: 'createChoice'; fromSceneId: string; id?: string; data: { text: string; toSceneId: string; imageUrl?: string | null; condition?: string; order: number; } }
     | { type: 'updateChoice'; id: string; data: { text: string; toSceneId: string; imageUrl?: string | null; condition?: string; order: number; } }
     | { type: 'deleteChoice'; id: string; };
 
@@ -115,7 +115,7 @@ export class AtomicService {
                             result = await this.adventureService.deleteAdventure(operation.id);
                             break;
                         case 'createScene':
-                            result = await this.sceneService.createScene(operation.adventureId, operation.data);
+                            result = await this.sceneService.createScene(operation.adventureId, operation.data, operation.id);
                             break;
                         case 'updateScene':
                             result = await this.sceneService.updateScene(operation.id, operation.data);
@@ -124,7 +124,7 @@ export class AtomicService {
                             result = await this.sceneService.deleteScene(operation.id, operation.redirectProgressionToSceneId);
                             break;
                         case 'createChoice':
-                            result = await this.choiceService.createChoice(operation.fromSceneId, operation.data);
+                            result = await this.choiceService.createChoice(operation.fromSceneId, operation.data, operation.id);
                             break;
                         case 'updateChoice':
                             result = await this.choiceService.updateChoice(operation.id, operation.data);

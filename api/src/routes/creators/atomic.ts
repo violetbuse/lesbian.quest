@@ -33,6 +33,7 @@ const atomicOperationSchema = z.discriminatedUnion('type', [
     z.object({
         type: z.literal('createScene'),
         adventureId: z.string().min(1),
+        id: z.string().min(1).optional(),
         data: z.object({
             title: z.string().min(1).max(100),
             content: z.string().min(1),
@@ -60,6 +61,7 @@ const atomicOperationSchema = z.discriminatedUnion('type', [
     z.object({
         type: z.literal('createChoice'),
         fromSceneId: z.string().min(1),
+        id: z.string().min(1).optional(),
         data: z.object({
             text: z.string().min(1).max(500),
             toSceneId: z.string().min(1),
