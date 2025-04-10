@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-Run tests after making changes to make sure that nothing has broken, and always try to add tests after making changes to reflect the new functionality

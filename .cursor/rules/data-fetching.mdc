@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-On the client, prefer simpler data fetching and state paradigms. Prefer libraries like zustand, swr, and immer.

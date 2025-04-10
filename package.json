@@ -1,38 +1,26 @@
 {
   "name": "lesbian.quest",
-  "workspaces": [
-    "api",
-    "web"
-  ],
   "version": "0.1.0",
-  "description": "",
-  "main": "dist/index.js",
+  "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
-    "dev:web": "npm run dev --workspace=web",
-    "dev:api": "npm run dev --workspace=api",
-    "build": "npm run build:web && npm run build:api",
-    "build:web": "npm run build --workspace=web",
-    "build:api": "npm run build --workspace=api",
-    "db:push:remote": "npm run db:push:remote --workspace=api",
-    "deploy": "npm run build && npm run deploy:web && npm run deploy:api && npm run db:push:remote",
-    "deploy:web": "npm run deploy --workspace=web",
-    "deploy:api": "npm run deploy --workspace=api",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/VioletBuse/lesbian.quest.git"
+  "dependencies": {
+    "@prisma/client": "^6.6.0",
+    "next": "15.3.0",
+    "prisma": "^6.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/VioletBuse/lesbian.quest/issues"
-  },
-  "homepage": "https://github.com/VioletBuse/lesbian.quest#readme",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "wrangler": "^4.3.0"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
