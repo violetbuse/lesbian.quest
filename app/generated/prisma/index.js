@@ -157,18 +157,17 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiNTliNjk0MzItNzJhMC00NjZjLTgwYjctNTlmODA3ZjVlNDg5IiwidGVuYW50X2lkIjoiZTg1ZWI5ZjA4ZTIyOTlkZWU1ZmExMGI0ZjI2MzAzMWM1OTFhMjkxMGE2YjJhNWUzYzI1MTA3M2MyNjBkMGU5NSIsImludGVybmFsX3NlY3JldCI6IjFmM2Y1ZjdlLWI1OTYtNDhlMi04ZGMwLTRlMWEzZGQ0N2I4ZSJ9.8Bv7sj4kUJXD8bAqsqcAO4r7WH5qifCV_vrHXE8Ng08"
       }
     }
   },
   "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  clerkId   String   @unique\n  email     String?\n  name      String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
   "inlineSchemaHash": "e6a719858e6380d54ae3eb8538c6366e849df6c33b4fdfec557f805f4b3068d9",
-  "copyEngine": true
+  "copyEngine": false
 }
 
 const fs = require('fs')
@@ -205,9 +204,3 @@ const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
 
-// file annotations for bundling tools to include these files
-path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");
-path.join(process.cwd(), "app/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node")
-// file annotations for bundling tools to include these files
-path.join(__dirname, "schema.prisma");
-path.join(process.cwd(), "app/generated/prisma/schema.prisma")
