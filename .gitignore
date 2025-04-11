@@ -50,3 +50,4 @@ prisma/dev.db-journal
 
 # wrangler
 cloudflare-env.d.ts
+.wrangler/
