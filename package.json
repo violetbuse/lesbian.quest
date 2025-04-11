@@ -4,19 +4,27 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "postinstall": "prisma generate --no-engine",
     "build": "next build",
-    "vercel-build": "prisma generate --no-engine && next build && prisma migrate deploy",
+    "prisma:generate": "prisma generate --no-engine",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "opennextjs-build": "npm run cf-typegen && opennextjs-cloudflare build",
+    "preview": "npm run opennextjs-build && opennextjs-cloudflare preview",
+    "deploy": "npm run opennextjs-build && opennextjs-cloudflare deploy",
+    "upload": "npm run opennextjs-build && opennextjs-cloudflare upload"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.14.2",
+    "@cloudflare/workers-types": "^4.20250410.0",
+    "@opennextjs/cloudflare": "^1.0.0-beta.2",
     "@prisma/client": "^6.6.0",
     "@prisma/extension-accelerate": "^1.3.0",
     "@radix-ui/react-slot": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "drizzle-kit": "^0.30.6",
+    "drizzle-orm": "^0.41.0",
     "lucide-react": "^0.487.0",
     "next": "15.3.0",
     "prisma": "^6.6.0",
@@ -31,6 +39,7 @@
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.2.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.10.0"
   }
 }

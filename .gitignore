@@ -44,3 +44,9 @@ next-env.d.ts
 prisma/dev.db
 prisma/dev.db-journal
 /app/generated/
+
+# opennextjs
+.open-next/
+
+# wrangler
+cloudflare-env.d.ts
