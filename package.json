@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run cf-typegen && next build",
     "prisma:generate": "prisma generate --no-engine",
     "start": "next start",
     "lint": "next lint",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "opennextjs-build": "npm run cf-typegen && opennextjs-cloudflare build",
+    "opennextjs-build": "opennextjs-cloudflare build",
     "preview": "npm run opennextjs-build && opennextjs-cloudflare preview",
     "deploy": "npm run opennextjs-build && opennextjs-cloudflare deploy",
     "upload": "npm run opennextjs-build && opennextjs-cloudflare upload"
