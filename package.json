@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "npm run cf-typegen && next build",
-    "prisma:generate": "prisma generate --no-engine",
+    "migrations:generate": "drizzle-kit generate",
+    "migrations:run": "npx wrangler d1 migrations apply lesbian-quest",
+    "migrations:deploy": "npx wrangler d1 migrations apply lesbian-quest --remote",
     "start": "next start",
     "lint": "next lint",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "opennextjs-build": "opennextjs-cloudflare build",
     "preview": "npm run opennextjs-build && opennextjs-cloudflare preview",
-    "deploy": "npm run opennextjs-build && opennextjs-cloudflare deploy",
+    "deploy": "npm run opennextjs-build && opennextjs-cloudflare deploy && npm run migrations:deploy",
     "upload": "npm run opennextjs-build && opennextjs-cloudflare upload"
   },
   "dependencies": {
@@ -26,6 +28,7 @@
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.41.0",
     "lucide-react": "^0.487.0",
+    "nanoid": "^5.1.5",
     "next": "15.3.0",
     "prisma": "^6.6.0",
     "react": "^19.0.0",

@@ -8,6 +8,13 @@
       "when": 1744362396288,
       "tag": "0000_bitter_veda",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1744479108374,
+      "tag": "0001_black_guardsmen",
+      "breakpoints": true
     }
   ]
 }
