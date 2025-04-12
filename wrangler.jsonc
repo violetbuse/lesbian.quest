@@ -4,6 +4,9 @@
     "name": "lesbian-quest",
     "compatibility_date": "2024-12-30",
     "compatibility_flags": ["nodejs_compat"],
+    "placement": {
+      "mode": "smart"
+    },
     "assets": {
       "directory": ".open-next/assets",
       "binding": "ASSETS",
