@@ -11,10 +11,9 @@ export const contract = c.router({
             200: z.object({
                 message: z.string()
             })
-        },
-        summary: "Get a hello message",
+        }
     }
 }, {
     strictStatusCodes: true,
-    pathPrefix: "/api/v1",
+    pathPrefix: "/api/v1/",
 })
