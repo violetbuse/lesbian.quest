@@ -1,6 +1,18 @@
+import { fetchRequestHandler } from "@ts-rest/serverless/fetch";
+import { contract } from "../shared/contract";
+import { router } from "./router";
 
 export default {
     fetch: (request: Request, env: Env, ctx: ExecutionContext) => {
-        return new Response('Hello World')
+        return fetchRequestHandler({
+            request,
+            contract,
+            router,
+            platformContext: null,
+            options: {
+                jsonQuery: true,
+                responseValidation: true,
+            }
+        })
     }
 }
