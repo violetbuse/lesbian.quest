@@ -11,7 +11,9 @@
     "typegen": "wrangler types ./api/worker-configuration.d.ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
     "@ts-rest/core": "^3.52.1",
+    "@ts-rest/react-query": "^3.52.1",
     "@ts-rest/serverless": "^3.52.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

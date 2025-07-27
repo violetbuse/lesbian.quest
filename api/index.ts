@@ -8,7 +8,7 @@ export default {
             request,
             contract,
             router,
-            platformContext: null,
+            platformContext: env,
             options: {
                 jsonQuery: true,
                 responseValidation: true,
